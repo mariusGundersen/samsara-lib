@@ -1,9 +1,11 @@
+var Enumerable = require('enumerable-component');
+
 module.exports = function(options){
   
   
   return {
     spirits: function(){
-      return [];
+      return Enumerable([]);
     },
     spirit: function(name){
       return {};
