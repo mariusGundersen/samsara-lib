@@ -12,10 +12,17 @@ describe("the Spirit", function() {
   });
   
   describe("instance", function() {
-    let instance;
+    let instance,
+        docker = {
+          listContainers: sinon.stub()
+        };
     
     beforeEach(function() {
-      instance = new Spirit("test");
+      instance = new Spirit("test", docker);
+    });
+    
+    afterEach(function(){
+      docker.listContainers.reset();
     });
   
     it("should be a Spirit", function() {
@@ -63,6 +70,52 @@ describe("the Spirit", function() {
       
       it("should return json", function(){
         result.should.deep.equal({name:'test'});
+      });
+    });
+    
+    describe("status stopped", function(){
+      let result;
+      
+      beforeEach(co.wrap(function*(){
+        docker.listContainers
+          .returns(Promise.resolve([]));
+        
+        because: {
+          result = yield instance.status;
+        }
+      }));
+            
+      it("should filter correctly", function(){
+        docker.listContainers.should.have.been.calledWith({
+          filters: '{"label":["samsara.spirit.life","samsara.spirit.name=test"],"status":["running"]}'
+        });
+      });
+      
+      it("should be stopped", function(){
+        result.should.deep.equal('stopped');
+      });
+    });
+      
+    describe("status running", function(){
+      let result;
+      
+      beforeEach(co.wrap(function*(){
+        docker.listContainers
+          .returns(Promise.resolve([{}]));
+        
+        because: {
+          result = yield instance.status;
+        }
+      }));
+            
+      it("should filter correctly", function(){
+        docker.listContainers.should.have.been.calledWith({
+          filters: '{"label":["samsara.spirit.life","samsara.spirit.name=test"],"status":["running"]}'
+        });
+      });
+      
+      it("should be stopped", function(){
+        result.should.deep.equal('running');
       });
     });
   });
