@@ -1,5 +1,6 @@
 'use strict'
 const samsara = require('../index');
+const co = require('co');
 const sinon = require('sinon');
 
 describe("the module", function(){
@@ -12,7 +13,10 @@ describe("the module", function(){
     let instance;
     
     beforeEach(function(){
-      instance = samsara();
+      
+      instance = samsara({
+        docker: {}
+      });
     });
   
     it("should be an object", function(){
@@ -29,16 +33,6 @@ describe("the module", function(){
   
     it("should have a way to create a spirit", function(){
       instance.createSpirit.should.be.an.instanceOf(Function);
-    });
-    
-    describe("spirits method", function(){
-      
-      it("should return an enumerable list of spirits", function(){
-        instance.spirits().any.should.be.an.instanceOf(Function);
-      });
-    
-    });
-  
-  });
-  
+    });  
+  });  
 });
