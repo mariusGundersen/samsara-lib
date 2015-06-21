@@ -9,10 +9,10 @@ module.exports = class Spirit{
     this.name = name;
   }
   *config(){
-    const result = yield fs.readFile(pathTo.configJson(name));
+    const result = yield fs.readFile(pathTo.configJson(this.name));
     return JSON.parse(result);
   }
   isDeploying(){
-    return fs.exists(pathTo.deployLock(name));
+    return fs.exists(pathTo.deployLock(this.name));
   }
 };

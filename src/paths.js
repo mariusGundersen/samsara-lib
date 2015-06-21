@@ -8,9 +8,9 @@ const CONFIG_JSON = 'config.json';
 
 module.exports = {
   configJson(name){
-    return path.join(p.CONFIG_SPIRITS, name, p.CONFIG_JSON)
+    return path.join(CONFIG_SPIRITS, name, CONFIG_JSON)
   },
   deployLock(name){
-    return path.join(p.CONFIG_SPIRITS, name, p.DEPLOY_LOCK)
+    return path.join(CONFIG_SPIRITS, name, DEPLOY_LOCK)
   }
 };
