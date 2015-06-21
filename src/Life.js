@@ -11,6 +11,17 @@ module.exports = class Life{
     this.life = life;
     Object.defineProperty(this, 'docker', {value:docker});
   }
+  get status(){
+    return this.docker.listContainers({
+      filters: JSON.stringify({
+        label:[
+          "samsara.spirit.life="+this.life,
+          "samsara.spirit.name="+this.name
+        ],
+        status: ['running']
+      })
+    }).then(containers => containers.length > 0 ? 'running' : 'stopped');
+  }
   get config(){
     return fs.readFile(pathTo.spiritLifeConfig(this.name, this.life))
       .then(result => JSON.parse(result));
