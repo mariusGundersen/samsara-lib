@@ -21,14 +21,6 @@ describe("the Spirit", function() {
     it("should be a Spirit", function() {
       instance.should.be.an.instanceOf(Spirit);
     });
-  
-    it("should have a way to get the config", function() {
-      instance.config.should.be.an.instanceOf(Function);
-    });
-  
-    it("should have a way to determine if it is deploying", function() {
-      instance.isDeploying.should.be.an.instanceOf(Function);
-    });
     
     describe("isDeploying", function(){
       beforeEach(function(){
@@ -36,7 +28,7 @@ describe("the Spirit", function() {
           .returns(true);
         
         because: {
-          instance.isDeploying();
+          instance.isDeploying;
         }
       });
       
@@ -57,7 +49,7 @@ describe("the Spirit", function() {
           .returns(Promise.resolve(JSON.stringify({name:'test'})));
         
         because: {
-          result = yield instance.config();
+          result = yield instance.config;
         }
       }));
       

@@ -30,10 +30,6 @@ describe("the Life", function() {
     it("should be a Life", function() {
       instance.should.be.an.instanceOf(Life);
     });
-  
-    it("should have a way to get the config", function() {
-      instance.config.should.be.an.instanceOf(Function);
-    });
     
     describe("config", function(){
       let result;
@@ -43,7 +39,7 @@ describe("the Life", function() {
           .returns(Promise.resolve(JSON.stringify({name:'test'})));
         
         because: {
-          result = yield instance.config();
+          result = yield instance.config;
         }
       }));
       
@@ -73,7 +69,7 @@ describe("the Life", function() {
         }));
         
         because: {
-          result = yield instance.container();
+          result = yield instance.container;
         }
       }));
             

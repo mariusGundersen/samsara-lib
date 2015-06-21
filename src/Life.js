@@ -11,11 +11,11 @@ module.exports = class Life{
     this.life = life;
     Object.defineProperty(this, 'docker', {value:docker});
   }
-  config(){
+  get config(){
     return fs.readFile(pathTo.spiritLifeConfig(this.name, this.life))
       .then(result => JSON.parse(result));
   }
-  container(){
+  get container(){
     return this.docker.listContainers({
       all: true, 
       filters: JSON.stringify({
