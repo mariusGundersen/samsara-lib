@@ -20,7 +20,10 @@ module.exports = class Life{
         ],
         status: ['running']
       })
-    }).then(containers => containers.length > 0 ? 'running' : 'stopped');
+    }).then(containers => 
+      containers.length > 0 
+      ? Life.STATUS_ALIVE 
+      : Life.STATUS_DEAD);
   }
   get config(){
     return fs.readFile(pathTo.spiritLifeConfig(this.name, this.life))
@@ -44,3 +47,6 @@ module.exports = class Life{
     }.bind(this));
   }
 };
+
+module.exports.STATUS_ALIVE = 'running';
+module.exports.STATUS_DEAD = 'stopped';
