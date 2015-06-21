@@ -23,7 +23,7 @@ describe("the Spirit", function(){
       expect(instance.config).to.be.a(Function);
     });
   
-    it("should have a way to detirmen if it is deploying", function(){
+    it("should have a way to determine if it is deploying", function(){
       expect(instance.isDeploying).to.be.a(Function);
     });
       

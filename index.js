@@ -1,16 +1,16 @@
-var Enumerable = require('enumerable-component');
+'use strict'
 
-module.exports = function(options){
-  
-  
+const Enumerable = require('enumerable-component');
+
+module.exports = function(options){  
   return {
-    spirits: function(){
+    spirits(){
       return Enumerable([]);
     },
-    spirit: function(name){
+    spirit(name){
       return {};
     },
-    createSpirit: function(name, image, tag){
+    createSpirit(name, image, tag){
       return true;
     }
   };

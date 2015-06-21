@@ -1,15 +1,18 @@
+'use strict'
+
 const fs = require('fs-promise');
 const co = require('co');
-const path = require('path');
-const p = require('./paths');
+const pathTo = require('./paths');
 
-module.exports = function Spirit(name){
-  this.name = name;
-  this.config = co.wrap(function*(){
-    const result = yield fs.readFile(path.join(p.CONFIG_SPIRITS, name, p.CONFIG_JSON));
+module.exports = class Spirit{
+  constructor(name){
+    this.name = name;
+  }
+  *config(){
+    const result = yield fs.readFile(pathTo.configJson(name));
     return JSON.parse(result);
-  }),
-  this.isDeploying = function(){
-    return fs.exists(path.join(p.CONFIG_SPIRITS, name, p.DEPLOY_LOCK));
+  }
+  isDeploying(){
+    return fs.exists(pathTo.deployLock(name));
   }
 };
