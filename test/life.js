@@ -12,10 +12,19 @@ describe("the Life", function() {
   });
   
   describe("instance", function() {
-    let instance;
+    let instance,
+        docker = {
+          listContainers: sinon.stub(),
+          getContainer: sinon.stub()
+        };
     
     beforeEach(function() {
-      instance = new Life("test", "1");
+      instance = new Life("test", "1", docker);
+    });
+    
+    afterEach(function(){
+      docker.listContainers.reset();
+      docker.getContainer.reset();
     });
   
     it("should be a Life", function() {
@@ -48,6 +57,39 @@ describe("the Life", function() {
       
       it("should return json", function(){
         result.should.deep.equal({name:'test'});
+      });
+    });
+    
+    describe("container", function(){
+      let result;
+      
+      beforeEach(co.wrap(function*(){
+        docker.listContainers.returns(Promise.resolve([
+          {Id: 'abcd123'}
+        ]));
+        
+        docker.getContainer.returns(Promise.resolve({
+          id: 'abcd123'
+        }));
+        
+        because: {
+          result = yield instance.container();
+        }
+      }));
+            
+      it("should filter correctly", function(){
+        docker.listContainers.should.have.been.calledWith({
+          all: true,
+          filters: '{"label":["samsara.spirit.life=1","samsara.spirit.name=test"]}'
+        });
+      });
+      
+      it("should get the right container", function(){
+        docker.getContainer.should.have.been.calledWith('abcd123');
+      });
+      
+      it("should return the container", function(){
+        result.should.deep.equal({id:'abcd123'});
       });
     });
   });

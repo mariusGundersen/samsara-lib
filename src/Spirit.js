@@ -11,15 +11,18 @@ module.exports = class Spirit{
     this.name = name;
     Object.defineProperty(this, 'docker', {value:docker});
   }
-  *config(){
-    const result = yield fs.readFile(pathTo.configJson(this.name));
-    return JSON.parse(result);
+  config(){
+    return fs.readFile(pathTo.configJson(this.name))
+    .then(result => JSON.parse(result));
   }
   isDeploying(){
     return fs.exists(pathTo.deployLock(this.name));
   }
-  *lives(){
-    const lives = yield getSpiritLives(this.name, this.docker);
-    return lives.map(life => new Life(this.name, life, this.docker));
+  lives(){
+    return getSpiritLives(this.name, this.docker)
+    .then(lives => lives.map(this.life));
+  }
+  life(life){
+    return new Life(this.name, life, this.docker);
   }
 };
