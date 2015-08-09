@@ -1,6 +1,5 @@
 'use strict'
 const Docker = require('dockerode-promise');
-const Enumerable = require('enumerable-component');
 
 const getSpiritNames = require('./src/getSpiritNames');
 const Spirit = require('./src/Spirit');
