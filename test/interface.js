@@ -34,5 +34,9 @@ describe("the module", function(){
     it("should have a way to create a spirit", function(){
       instance.createSpirit.should.be.an.instanceOf(Function);
     });
+    
+    it("should have a way to create a container configuration", function(){
+      instance.createContainerConfig.should.be.an.instanceOf(Function);
+    });
   });  
 });
