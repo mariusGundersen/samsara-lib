@@ -33,6 +33,6 @@ describe("the module", function(){
   
     it("should have a way to create a spirit", function(){
       instance.createSpirit.should.be.an.instanceOf(Function);
-    });  
+    });
   });  
 });
