@@ -37,6 +37,27 @@ module.exports = class Spirit{
     return getSpiritLives(this.name, this.docker)
     .then(lives => lives.map(life));
   }
+  get currentLife(){
+     return this.lives.then(co.wrap(function *(lives){
+       const tests = yield Promise.all(lives.map(life =>
+         life.status.then(status => ({
+           test: status == Life.STATUS_ALIVE,
+           value: life
+         }))
+       ));
+       const alives = tests
+        .filter(temp => temp.test)
+        .map(temp => temp.value);
+       if(alives.length > 0){
+         return alives[0];
+       }else{
+         return null;
+       }
+     }));
+  }
+  get latestLife(){
+    return this.lives.then(lives => lives[lives.length - 1]);
+  }
   life(life){
     return new Life(this.name, life, this.docker);
   }

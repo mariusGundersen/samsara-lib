@@ -12,9 +12,7 @@ module.exports = function(options){
   
   return {
     spirits(){
-      return getSpiritNames(docker).then(names =>
-        Enumerable(names.map(name => new Spirit(name, docker)))
-      );
+      return getSpiritNames(docker).then(names => names.map(name => new Spirit(name, docker)));
     },
     spirit(name){
       return new Spirit(name, docker);

@@ -15,8 +15,8 @@ module.exports = class Life{
     return this.docker.listContainers({
       filters: JSON.stringify({
         label:[
-          "samsara.spirit.life="+this.life,
-          "samsara.spirit.name="+this.name
+          `samsara.spirit.life=${this.life}`,
+          `samsara.spirit.name=${this.name}`
         ],
         status: ['running']
       })
@@ -34,15 +34,15 @@ module.exports = class Life{
       all: true, 
       filters: JSON.stringify({
         'label':[
-          'samsara.spirit.life='+this.life, 
-          'samsara.spirit.name='+this.name
+          `samsara.spirit.life=${this.life}`,
+          `samsara.spirit.name=${this.name}`
         ]
       })
     }).then(function(result){
       if(result.length){
         return this.docker.getContainer(result[0].Id);
       }else{
-        throw new Error('Container for spirit '+this.name+' ('+this.life+') doesn\'t exist');
+        throw new Error(`Container for spirit ${this.name} (${this.life}) doesn't exist`);
       }
     }.bind(this));
   }
