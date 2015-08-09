@@ -1,5 +1,6 @@
 const fs = require('fs-promise');
 const co = require('co');
+const mkdirp = require('mkdirp-promise');
 const pathTo = require('./paths');
 
 module.exports = co.wrap(function*(docker){
@@ -12,6 +13,8 @@ module.exports = co.wrap(function*(docker){
       ]
     })
   });
+  
+  yield mkdirp(pathTo.spirits());
   
   const files = yield fs.readdir(pathTo.spirits());
   const directories = yield files.filter(name => isDirectory(pathTo.spirit(name)));

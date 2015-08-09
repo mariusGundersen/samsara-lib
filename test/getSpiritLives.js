@@ -11,7 +11,7 @@ describe("getSpiritLives", function() {
   
   beforeEach(co.wrap(function*(){
     sinon.stub(fs, 'readdir')
-      .returns(Promise.resolve(['1', '2', '3']));
+      .returns(Promise.resolve(['3', '1', '2']));
     
     sinon.stub(fs, 'stat')
       .returns(Promise.resolve({isDirectory(){return true}}));

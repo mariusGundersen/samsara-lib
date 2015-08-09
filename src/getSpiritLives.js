@@ -1,5 +1,6 @@
 const fs = require('fs-promise');
 const co = require('co');
+const mkdirp = require('mkdirp-promise');
 const pathTo = require('./paths');
 
 module.exports = co.wrap(function*(name, docker){
@@ -13,6 +14,8 @@ module.exports = co.wrap(function*(name, docker){
     })
   });
   
+  yield mkdirp(pathTo.spiritLives(name));
+  
   const files = yield fs.readdir(pathTo.spiritLives(name));
   const directories = yield files.filter(life => isDirectory(pathTo.life(name, life)));
   
@@ -20,7 +23,7 @@ module.exports = co.wrap(function*(name, docker){
     .concat(containers
       .map(container => container.Labels['samsara.spirit.life'])
       .filter(container => directories.indexOf(container) === -1)
-    ).sort((a,b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    ).sort((a,b) => a*1 < b*1 ? -1 : a*1 > b*1 ? 1 : 0);
 });
 
 function isDirectory(path){
