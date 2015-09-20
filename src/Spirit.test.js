@@ -1,5 +1,5 @@
 'use strict'
-const Spirit = require('../src/Spirit');
+const Spirit = require('./Spirit');
 const fs = require('fs-promise');
 const co = require('co');
 const sinon = require("sinon");

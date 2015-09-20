@@ -1,31 +1,31 @@
 'use strict'
-const getSpiritLives = require('../src/getSpiritLives');
+const getSpiritNames = require('./getSpiritNames');
 const fs = require('fs-promise');
 const co = require('co');
 const sinon = require("sinon");
 const expect = chai.expect;
 
-describe("getSpiritLives", function() {
+describe("getSpiritNames", function() {
   let result,
       docker;
   
   beforeEach(co.wrap(function*(){
     sinon.stub(fs, 'readdir')
-      .returns(Promise.resolve(['3', '1', '2']));
+      .returns(Promise.resolve(['Test', 'website', 'database']));
     
     sinon.stub(fs, 'stat')
       .returns(Promise.resolve({isDirectory(){return true}}));
 
     docker = {
       listContainers: sinon.stub().returns(Promise.resolve([
-        {Labels:{'samsara.spirit.life':'2'}},
-        {Labels:{'samsara.spirit.life':'3'}},
-        {Labels:{'samsara.spirit.life':'4'}}
+        {Labels:{'samsara.spirit.name':'Test'}},
+        {Labels:{'samsara.spirit.name':'mail'}},
+        {Labels:{'samsara.spirit.name':'database'}}
       ]))
     };
     
     because: {
-      result = yield getSpiritLives('test', docker);
+      result = yield getSpiritNames(docker);
     }
   }));
 
@@ -35,27 +35,27 @@ describe("getSpiritLives", function() {
   });
 
   it("should read dir from the right directory", function(){
-    fs.readdir.should.have.been.calledWith('config/spirits/test/lives');  
+    fs.readdir.should.have.been.calledWith('config/spirits');  
   });
 
-  it("should get all containers with the right name", function(){
+  it("should get all containers that are spirits", function(){
     docker.listContainers.should.have.been.calledWith({
       all: true, 
-    filters: '{"label":["samsara.spirit.life","samsara.spirit.name=test"]}'
+      filters: '{"label":["samsara.spirit.life","samsara.spirit.name"]}'
     });  
   });
   
   it("should return names which are both containers and directories", function(){
-    result.should.contain('2');
-    result.should.contain('3');
+    result.should.contain('Test');
+    result.should.contain('database');
   });
   
   it("should return names which are only containers", function(){
-    result.should.contain('4');
+    result.should.contain('mail');
   });
   
   it("should return names which are only directories", function(){
-    result.should.contain('1');
+    result.should.contain('website');
   });
   
   it("should not return duplicates", function(){
@@ -63,6 +63,6 @@ describe("getSpiritLives", function() {
   });
   
   it("should return the spirits in sorted order", function(){
-    result.should.eql(['1', '2', '3', '4']);
+    result.should.eql(['database', 'mail', 'Test', 'website']);
   });
 });

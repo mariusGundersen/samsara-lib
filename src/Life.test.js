@@ -1,5 +1,5 @@
 'use strict'
-const Life = require('../src/Life');
+const Life = require('./Life');
 const fs = require('fs-promise');
 const co = require('co');
 const sinon = require("sinon");

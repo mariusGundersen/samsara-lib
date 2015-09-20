@@ -18,7 +18,7 @@
     "sinon-chai": "^2.8.0"
   },
   "scripts": {
-    "test": "iojs node_modules/mocha/bin/_mocha"
+    "test": "node node_modules/mocha/bin/_mocha -w test/**/*.js src/*.test.js src/**/*.test.js"
   },
   "repository": {
     "type": "git",
