@@ -20,9 +20,9 @@ module.exports = class Spirit{
         ],
         status: ['running']
       })
-    }).then(containers => 
-      containers.length > 0 
-      ? Spirit.STATUS_ALIVE 
+    }).then(containers =>
+      containers.length > 0
+      ? Spirit.STATUS_ALIVE
       : Spirit.STATUS_DEAD);
   }
   get config(){
@@ -33,9 +33,8 @@ module.exports = class Spirit{
     return fs.exists(pathTo.deployLock(this.name));
   }
   get lives(){
-    const life = this.life.bind(this);//oh V8...
     return getSpiritLives(this.name, this.docker)
-    .then(lives => lives.map(life));
+    .then(lives => lives.map(life => this.life(life)));
   }
   get currentLife(){
      return this.lives.then(co.wrap(function *(lives){

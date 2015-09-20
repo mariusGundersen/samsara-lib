@@ -20,9 +20,9 @@ module.exports = class Life{
         ],
         status: ['running']
       })
-    }).then(containers => 
-      containers.length > 0 
-      ? Life.STATUS_ALIVE 
+    }).then(containers =>
+      containers.length > 0
+      ? Life.STATUS_ALIVE
       : Life.STATUS_DEAD);
   }
   get config(){
@@ -31,7 +31,7 @@ module.exports = class Life{
   }
   get container(){
     return this.docker.listContainers({
-      all: true, 
+      all: true,
       filters: JSON.stringify({
         'label':[
           `samsara.spirit.life=${this.life}`,

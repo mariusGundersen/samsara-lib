@@ -23,7 +23,7 @@ module.exports = co.wrap(function*(name, docker){
     .concat(containers
       .map(container => container.Labels['samsara.spirit.life'])
       .filter(container => directories.indexOf(container) === -1)
-    ).sort((a,b) => a*1 < b*1 ? -1 : a*1 > b*1 ? 1 : 0);
+    ).sort((a,b) => a - b);
 });
 
 function isDirectory(path){
