@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "chai": "^3.0.0",
+    "descartes": "~0.0.5",
     "mocha": "^2.2.5",
     "sinon": "^1.14.1",
     "sinon-chai": "^2.8.0"
