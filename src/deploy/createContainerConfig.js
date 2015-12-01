@@ -4,10 +4,10 @@ const co = require('co');
 module.exports = co.wrap(function*(name, life, config, getSpirit){
   const links = yield makeLinks(getSpirit, config.links);
   const volumes = yield makeVolumesFrom(getSpirit, config.volumesFrom);
-  
+
   return extend({
-    Image: config.image+':'+config.tag, 
-    name: name,
+    Image: config.image+':'+config.tag,
+    name: name + '_v' + life,
     Env: makeEnv(config.env),
     Volumes: makeVolumes(config.volumes),
     Labels: makeLabels(config.name, life),
@@ -90,7 +90,7 @@ function makeVolumesFrom(getSpirit, spirits){
 }
 
 function makeLabels(name, life){
-  return {  
+  return {
     'samsara.spirit.name': name,
     'samsara.spirit.life': life.toString()
   };
