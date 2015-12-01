@@ -16,13 +16,14 @@ describe('createLogger', function(){
     });
 
     it('should emit the right plan', function(done){
-      this.logger.eventEmitter.on('plan', function(event){
+      this.logger.eventEmitter.on('start', function(event){
         event.spirit.should.equal('something');
+        event.life.should.equal(15);
         event.plan.should.deep.equal(['test', 'done']);
         done();
       });
 
-      this.logger.plan(['test', 'done']);
+      this.logger.start(15, ['test', 'done']);
     });
 
     it('should emit the right message', function(done){
@@ -42,6 +43,16 @@ describe('createLogger', function(){
       });
 
       this.logger.stage('hello');
+    });
+
+    it('should emit the right end', function(done){
+      this.logger.eventEmitter.on('stop', function(event){
+        event.spirit.should.equal('something');
+        event.error.should.deep.equal({});
+        done();
+      });
+
+      this.logger.stop({});
     });
   });
 });

@@ -4,14 +4,17 @@ module.exports = function createLogger(name){
   const eventEmitter = new events.EventEmitter();
   return {
     eventEmitter: eventEmitter,
+    start(life, plan){
+      eventEmitter.emit('start', {spirit: name, life: life, plan: plan});
+    },
     message(message){
       eventEmitter.emit('message', {spirit: name, message: message});
     },
-    plan(plan){
-      eventEmitter.emit('plan', {spirit: name, plan: plan});
-    },
     stage(){
       eventEmitter.emit('stage', {spirit: name});
+    },
+    stop(error){
+      eventEmitter.emit('stop', {spirit: name, error: error});
     }
   }
 }
