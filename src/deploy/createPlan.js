@@ -1,22 +1,40 @@
 module.exports = {
   deploy(config){
-    return ['pull', 'create']
-    .concat(startStop(config.deploymentMethod))
-    .concat(cleanup(config.cleanupLimit))
-    .concat(['done']);
+    return spread(function*(){
+      yield 'pull';
+      yield 'create';
+      if(config.deploymentMethod === 'stop-before-start'){
+        yield 'stop';
+        yield 'start';
+      }else{
+        yield 'start';
+        yield 'stop';
+      }
+      if(config.cleanupLimit > 0){
+        yield 'cleanup';
+      }
+      yield 'done';
+    });
   },
   reincarnate(config){
-    return startStop(config.deploymentMethod)
-    .concat(['done']);
+    return spread(function*(){
+      if(config.deploymentMethod === 'stop-before-start'){
+        yield 'stop';
+        yield 'start';
+      }else{
+        yield 'start';
+        yield 'stop';
+      }
+      yield 'done';
+    });
   }
 };
 
-function cleanup(cleanupLimit){
-  return cleanupLimit > 0 ? ['cleanup'] : [];
-}
-
-function startStop(deploymentMethod){
-  return deploymentMethod === 'stop-before-start'
-    ? ['stop', 'start']
-    : ['start', 'stop'];
+function spread(iterator){
+  'use strict'
+  const result = [];
+  for(let item of iterator()){
+    result.push(item);
+  }
+  return result;
 }
