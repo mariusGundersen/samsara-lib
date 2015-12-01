@@ -1,6 +1,7 @@
 const startBeforeStop = require('./startBeforeStop');
 const sinon = require('sinon');
 const co = require('co');
+const descartes = require('descartes');
 
 describe("startBeforeStop", function(){
   it("should be a function", function(){
@@ -9,10 +10,12 @@ describe("startBeforeStop", function(){
 
   describe("when called", function(){
     beforeEach(function(){
+      const jar = new descartes.Jar();
       this.clock = sinon.useFakeTimers();
-      this.startSpy = sinon.stub().returns(Promise.resolve());
-      this.stopSpy = sinon.stub().returns(Promise.resolve());
-      this.logSpy = sinon.spy(m => m == 'Waiting 5 seconds' && Promise.resolve().then(() => this.clock.tick(5000)));
+      this.startSpy = jar.probe('container.start');
+      this.stopSpy = jar.probe('container.stop');
+      this.logSpy = jar.sensor('log.message');
+      this.stageSpy = jar.sensor('log.stage');
     });
 
     afterEach(function(){
@@ -20,33 +23,38 @@ describe("startBeforeStop", function(){
     });
 
     it("should do things in the right order", co.wrap(function*(){
+      const result = startBeforeStop({start: this.startSpy}, {stop: this.stopSpy}, {message: this.logSpy, stage: this.stageSpy});
 
-      yield startBeforeStop({start: this.startSpy}, {stop: this.stopSpy}, this.logSpy);
+      yield this.logSpy.called(descartes.withArgs('Starting new container'));
 
-      this.logSpy.should.have.been.calledWith('Starting new container');
+      yield this.startSpy.called();
 
-      this.startSpy.should.have.been.calledOnce;
+      yield this.logSpy.called(descartes.withArgs('Container started'));
 
-      this.logSpy.should.have.been.calledWith('Container started');
+      yield this.stageSpy.called();
 
-      this.logSpy.should.have.been.calledWith('Waiting 5 seconds');
+      yield this.logSpy.called(descartes.withArgs('Waiting 5 seconds'));
 
-      this.logSpy.should.have.been.calledWith('Waited 5 seconds');
+      this.clock.tick(5000)
 
-      this.logSpy.should.have.been.calledWith('Stopping previous container');
+      yield this.logSpy.called(descartes.withArgs('Waited 5 seconds'));
 
-      this.stopSpy.should.have.been.calledOnce;
+      yield this.logSpy.called(descartes.withArgs('Stopping previous container'));
 
-      this.logSpy.should.have.been.calledWith('Container stopped');
+      yield this.stopSpy.called();
+
+      yield this.logSpy.called(descartes.withArgs('Container stopped'));
     }));
   });
 
   describe("when called without any container to stop", function(){
     beforeEach(function(){
+      const jar = new descartes.Jar();
       this.clock = sinon.useFakeTimers();
-      this.startSpy = sinon.stub().returns(Promise.resolve());
-      this.stopSpy = sinon.spy();
-      this.logSpy = sinon.spy();
+      this.startSpy = jar.probe();
+      this.stopSpy = jar.sensor();
+      this.logSpy = jar.sensor();
+      this.stageSpy = jar.sensor();
     });
 
     afterEach(function(){
@@ -54,16 +62,17 @@ describe("startBeforeStop", function(){
     });
 
     it("should do things in the right order", co.wrap(function*(){
+      const result = startBeforeStop({start: this.startSpy}, null, {message: this.logSpy, stage: this.stageSpy});
 
-      yield startBeforeStop({start: this.startSpy}, null, this.logSpy);
+      yield this.logSpy.called(descartes.withArgs('Starting new container'));
 
-      this.logSpy.should.have.been.calledWith('Starting new container');
+      yield this.startSpy.called();
 
-      this.startSpy.should.have.been.calledOnce;
+      yield this.logSpy.called(descartes.withArgs('Container started'));
 
-      this.logSpy.should.have.been.calledWith('Container started');
+      yield this.stageSpy.called();
 
-      this.stopSpy.should.not.have.been.called;
+      yield this.logSpy.called(descartes.withArgs('No container to stop'));
     }));
   });
 });

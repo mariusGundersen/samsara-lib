@@ -1,187 +1,172 @@
 const stopBeforeStart = require('./stopBeforeStart');
 const sinon = require('sinon');
 const co = require('co');
+const descartes = require('descartes');
 
 describe("stopBeforeStart", function(){
   it("should be a function", function(){
     stopBeforeStart.should.be.a('Function');
   });
-  
+
   describe("when called", function(){
     beforeEach(function(){
-      this.startSpy = sinon.stub().returns(Promise.resolve());
-      this.stopSpy = sinon.stub().returns(Promise.resolve());
-      this.logSpy = sinon.spy();
+      const jar = new descartes.Jar();
+      this.startSpy = jar.probe('containerToStart.start');
+      this.stopSpy = jar.probe('containerToStop.stop');
+      this.restartSpy = jar.probe('containerToStop.start');
+      this.logSpy = jar.sensor('log.message');
+      this.stageSpy = jar.sensor('log.stage');
     });
-    
+
     it("should do things in the right order", co.wrap(function*(){
-            
-      yield stopBeforeStart({stop: this.stopSpy}, {start: this.startSpy}, this.logSpy);
-      
-      this.logSpy.should.have.been.calledWith('Stopping previous container');
-      
-      this.stopSpy.should.have.been.calledOnce;
-      
-      this.logSpy.should.have.been.calledWith('Container stopped');
-      
-      this.logSpy.should.have.been.calledWith('Starting new container');
-      
-      this.startSpy.should.have.been.calledOnce;
-      
-      this.logSpy.should.have.been.calledWith('Container started');
+      stopBeforeStart({stop: this.stopSpy}, {start: this.startSpy}, {message: this.logSpy, stage: this.stageSpy});
+
+      yield this.logSpy.called(descartes.withArgs('Stopping previous container'));
+
+      yield this.stopSpy.called();
+
+      yield this.logSpy.called(descartes.withArgs('Container stopped'));
+
+      yield this.stageSpy.called();
+
+      yield this.logSpy.called(descartes.withArgs('Starting new container'));
+
+      yield this.startSpy.called();
+
+      yield this.logSpy.called(descartes.withArgs('Container started'));
     }));
-    
+
     describe("without a container to stop", function(){
       it("should not attempt to stop it", co.wrap(function*(){
+        stopBeforeStart(null, {start: this.startSpy}, {message: this.logSpy, stage: this.stageSpy});
 
-        yield stopBeforeStart(null, {start: this.startSpy}, this.logSpy);
+        yield this.logSpy.called(descartes.withArgs('No container to stop'));
 
-        this.logSpy.should.not.have.been.calledWith('Stopping previous container');
+        yield this.stageSpy.called();
 
-        this.logSpy.should.not.have.been.calledWith('Container stopped');
+        yield this.logSpy.called(descartes.withArgs('Starting new container'));
 
-        this.logSpy.should.have.been.calledWith('Starting new container');
+        yield this.startSpy.called();
 
-        this.startSpy.should.have.been.calledOnce;
-
-        this.logSpy.should.have.been.calledWith('Container started');
+        yield this.logSpy.called(descartes.withArgs('Container started'));
       }));
-    
-      describe("and starting fails", function(){
-        
-        beforeEach(function(){
-          this.startSpy.returns(Promise.reject(new Error()));
-        });
 
+      describe("and starting fails", function(){
         it("should not attempt to restart it", co.wrap(function*(){
+          const result = stopBeforeStart(null, {start: this.startSpy}, {message: this.logSpy, stage: this.stageSpy});
+
+          yield this.logSpy.called(descartes.withArgs('No container to stop'));
+
+          yield this.stageSpy.called();
+
+          yield this.logSpy.called(descartes.withArgs('Starting new container'));
+
+          this.startSpy.rejects(new Error());
+          yield this.startSpy.called();
+
+          yield this.logSpy.called(descartes.withArgs('Could not start new container'));
 
           try{
-            yield stopBeforeStart(null, {start: this.startSpy}, this.logSpy);
+            yield result;
           }catch(e){
             e.should.be.a('Error');
           }
-
-          this.logSpy.should.not.have.been.calledWith('Stopping previous container');
-
-          this.logSpy.should.not.have.been.calledWith('Container stopped');
-
-          this.logSpy.should.have.been.calledWith('Starting new container');
-
-          this.startSpy.should.have.been.calledOnce;
-
-          this.logSpy.should.not.have.been.calledWith('Container started');
-
-          this.logSpy.should.have.been.calledWith('Could not start new container');
-
-          this.logSpy.should.not.have.been.calledWith('Attempting to rollback');
         }));
       });
     });
-    
+
     describe("and stopping fails", function(){
-      
-      beforeEach(function(){
-        this.stopSpy.returns(Promise.reject(new Error()));
-      });
-      
       it("should abort", co.wrap(function*(){
-        
+        const result = stopBeforeStart({stop: this.stopSpy}, {start: this.startSpy}, {message: this.logSpy, stage: this.stageSpy});
+
+        yield this.logSpy.called(descartes.withArgs('Stopping previous container'));
+
+        this.stopSpy.rejects(new Error());
+        yield this.stopSpy.called();
+
         try{
-          yield stopBeforeStart({stop: this.stopSpy}, {start: this.startSpy}, this.logSpy);
+          yield result;
         }catch(e){
           e.should.be.a('Error');
         }
-
-        this.logSpy.should.have.been.calledWith('Stopping previous container');
-
-        this.stopSpy.should.have.been.calledOnce;
-
-        this.logSpy.should.not.have.been.calledWith('Container stopped');
-
-        this.logSpy.should.not.have.been.calledWith('Starting new container');
-
-        this.startSpy.should.not.have.been.calledOnce;
-
-        this.logSpy.should.not.have.been.calledWith('Container started');
       }));
     });
-    
+
     describe("and starting fails", function(){
-      
-      beforeEach(function(){
-        this.startSpy.returns(Promise.reject(new Error()));
-        this.restartSpy = sinon.stub().returns(Promise.resolve());
-      });
-      
       it("should attempt to restart the stop container", co.wrap(function*(){
-        
+        const result = stopBeforeStart({stop: this.stopSpy, start: this.restartSpy}, {start: this.startSpy}, {message: this.logSpy, stage: this.stageSpy});
+
+        yield this.logSpy.called(descartes.withArgs('Stopping previous container'));
+
+        yield this.stopSpy.called();
+
+        yield this.logSpy.called(descartes.withArgs('Container stopped'));
+
+        yield this.stageSpy.called();
+
+        yield this.logSpy.called(descartes.withArgs('Starting new container'));
+
+        this.startSpy.rejects(new Error());
+        yield this.startSpy.called();
+
+        yield this.logSpy.called(descartes.withArgs('Could not start new container'));
+
+        yield this.logSpy.called();
+
+        yield this.logSpy.called(descartes.withArgs('Attempting to rollback'));
+
+        yield this.logSpy.called(descartes.withArgs('Starting previous container'));
+
+        yield this.restartSpy.called();
+
+        yield this.logSpy.called(descartes.withArgs('Previous container started'));
+
         try{
-          yield stopBeforeStart({stop: this.stopSpy, start: this.restartSpy}, {start: this.startSpy}, this.logSpy);
+          yield result;
         }catch(e){
           e.should.be.a('Error');
         }
-
-        this.logSpy.should.have.been.calledWith('Stopping previous container');
-
-        this.stopSpy.should.have.been.calledOnce;
-
-        this.logSpy.should.have.been.calledWith('Container stopped');
-
-        this.logSpy.should.have.been.calledWith('Starting new container');
-
-        this.startSpy.should.have.been.calledOnce;
-
-        this.logSpy.should.not.have.been.calledWith('Container started');
-
-        this.logSpy.should.have.been.calledWith('Could not start new container');
-
-        this.logSpy.should.have.been.calledWith('Attempting to rollback');
-        
-        this.restartSpy.should.have.been.calledOnce;
-
-        this.logSpy.should.have.been.calledWith('Starting previous container');
-
-        this.logSpy.should.have.been.calledWith('Previous container started');
       }));
     });
-    
-    describe("and restarting fails", function(){
-      
-      beforeEach(function(){
-        this.startSpy.returns(Promise.reject(new Error()));
-        this.restartSpy = sinon.stub().returns(Promise.reject(new Error()));
-      });
 
+    describe("and restarting fails", function(){
       it("should attempt to restart the stop container", co.wrap(function*(){
+        const result = stopBeforeStart({stop: this.stopSpy, start: this.restartSpy}, {start: this.startSpy}, {message: this.logSpy, stage: this.stageSpy});
+
+        yield this.logSpy.called(descartes.withArgs('Stopping previous container'));
+
+        yield this.stopSpy.called();
+
+        yield this.logSpy.called(descartes.withArgs('Container stopped'));
+
+        yield this.stageSpy.called();
+
+        yield this.logSpy.called(descartes.withArgs('Starting new container'));
+
+        this.startSpy.rejects(new Error());
+        yield this.startSpy.called();
+
+        yield this.logSpy.called(descartes.withArgs('Could not start new container'));
+
+        yield this.logSpy.called();
+
+        yield this.logSpy.called(descartes.withArgs('Attempting to rollback'));
+
+        yield this.logSpy.called(descartes.withArgs('Starting previous container'));
+
+        this.restartSpy.rejects(new Error());
+        yield this.restartSpy.called();
+
+        yield this.logSpy.called(descartes.withArgs('Failed to rollback to previous container'));
+
+        yield this.logSpy.called();
 
         try{
-          yield stopBeforeStart({stop: this.stopSpy, start: this.restartSpy}, {start: this.startSpy}, this.logSpy);
+          yield result;
         }catch(e){
           e.should.be.a('Error');
           e.innerException.should.be.an('Error');
         }
-
-        this.logSpy.should.have.been.calledWith('Stopping previous container');
-
-        this.stopSpy.should.have.been.calledOnce;
-
-        this.logSpy.should.have.been.calledWith('Container stopped');
-
-        this.logSpy.should.have.been.calledWith('Starting new container');
-
-        this.startSpy.should.have.been.calledOnce;
-
-        this.logSpy.should.not.have.been.calledWith('Container started');
-
-        this.logSpy.should.have.been.calledWith('Could not start new container');
-
-        this.logSpy.should.have.been.calledWith('Attempting to rollback');
-
-        this.restartSpy.should.have.been.calledOnce;
-
-        this.logSpy.should.have.been.calledWith('Starting previous container');
-
-        this.logSpy.should.have.been.calledWith('Failed to rollback to previous container');
       }));
     });
   });

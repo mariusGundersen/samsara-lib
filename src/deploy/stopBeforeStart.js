@@ -2,27 +2,31 @@ const co = require('co');
 
 module.exports = co.wrap(function *stopBeforeStart(containerToStop, containerToStart, log){
   if(containerToStop){
-    log('Stopping previous container');
+    log.message('Stopping previous container');
     yield containerToStop.stop();
-    log('Container stopped');
+    log.message('Container stopped');
+  }else{
+    log.message('No container to stop');
   }
-  
+
+  log.stage();
+
   try{
-    log('Starting new container')
+    log.message('Starting new container')
     yield containerToStart.start();
-    log('Container started');
+    log.message('Container started');
   }catch(e){
-    log('Could not start new container');
+    log.message('Could not start new container');
     if(containerToStop){
-      log(e);
-      log('Attempting to rollback');
+      log.message(e);
+      log.message('Attempting to rollback');
       try{
-        log('Starting previous container');
+        log.message('Starting previous container');
         yield containerToStop.start();
-        log('Previous container started');
+        log.message('Previous container started');
       }catch(innerException){
-        log('Failed to rollback to previous container');
-        log(innerException);
+        log.message('Failed to rollback to previous container');
+        log.message(innerException);
         e.innerException = innerException;
       }
     }

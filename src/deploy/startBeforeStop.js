@@ -1,16 +1,20 @@
 const co = require('co');
 
 module.exports = co.wrap(function *(containerToStart, containerToStop, log){
-  log('Starting new container')
+  log.message('Starting new container')
   yield containerToStart.start();
-  log('Container started');
+  log.message('Container started');
+
+  log.stage();
   if(containerToStop && 'stop' in containerToStop){
-    log('Waiting 5 seconds');
+    log.message('Waiting 5 seconds');
     yield delay(5000);
-    log('Waited 5 seconds');
-    log('Stopping previous container');
+    log.message('Waited 5 seconds');
+    log.message('Stopping previous container');
     yield containerToStop.stop();
-    log('Container stopped');
+    log.message('Container stopped');
+  }else{
+    log.message('No container to stop');
   }
 });
 
