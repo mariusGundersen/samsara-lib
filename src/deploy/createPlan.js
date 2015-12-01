@@ -13,7 +13,6 @@ module.exports = {
       if(config.cleanupLimit > 0){
         yield 'cleanup';
       }
-      yield 'done';
     });
   },
   reincarnate(config){
@@ -25,7 +24,6 @@ module.exports = {
         yield 'start';
         yield 'stop';
       }
-      yield 'done';
     });
   }
 };
