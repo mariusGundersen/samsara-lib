@@ -5,29 +5,29 @@ module.exports = co.wrap(function *(lives, newestLife, docker, log){
   .filter(life => life.life < newestLife)
   .map(life => life.container.catch(e => null))))
   .filter(container => container);
-  
+
   log(`Removing ${containers.length} old containers`);
-  
+
   const imageIds = (yield Promise.all(containers
   .map(container => container.inspect())
   .map(info => info.then(i => i.Image, e => log(e)))))
   .filter(imageId => imageId)
   .filter(distinct);
-  
+
   yield Promise.all(containers
   .map(co.wrap(function*(container){
     try{
-      log('Removing container '+container.Id);
+      log('Removing container '+container.id);
       yield container.remove({v: true});
-      log('Removed container '+container.Id);
+      log('Removed container '+container.id);
     }catch(e){
-      log('Failed to remove container '+container.Id);
+      log('Failed to remove container '+container.id);
       log(e);
     }
   })));
-    
+
   log(`Removing ${imageIds.length} old images`);
-  
+
   return yield imageIds.map(co.wrap(function *(imageId){
     try{
       const image = docker.getImage(imageId);

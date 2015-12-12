@@ -46,7 +46,7 @@ describe("cleanupOldContainers", function(){
         remove: Promise.resolve()
       },
       container: {
-        Id: '12345abcde',
+        id: '12345abcde',
         inspect: {Image: 'abcde12345'},
         remove: Promise.resolve()
       },
@@ -87,7 +87,7 @@ describe("cleanupOldContainers", function(){
         remove: Promise.resolve()
       },
       container: {
-        Id: '12345abcde',
+        id: '12345abcde',
         inspect: {Image: 'abcde12345'},
         remove: Promise.reject(new Error())
       },
@@ -130,7 +130,7 @@ describe("cleanupOldContainers", function(){
         remove: Promise.reject(new Error())
       },
       container: {
-        Id: '12345abcde',
+        id: '12345abcde',
         inspect: {Image: 'abcde12345'},
         remove: Promise.resolve()
       },
@@ -176,7 +176,7 @@ function setup(config){
     };
 
     var container = this.container = {
-      Id: config.container.Id,
+      id: config.container.id,
       inspect: sinon.stub().returns(Promise.resolve(config.container.inspect)),
       remove: sinon.stub().returns(config.container.remove)
     };
