@@ -4,6 +4,7 @@ const fs = require('fs-promise');
 const co = require('co');
 const pathTo = require('./paths');
 const getSpiritLives = require('./getSpiritLives');
+const deploy = require('./deploy');
 const Life = require('./Life');
 
 module.exports = class Spirit{
@@ -59,6 +60,9 @@ module.exports = class Spirit{
   }
   life(life){
     return new Life(this.name, life, this.docker);
+  }
+  deploy(){
+    return deploy(this, this.docker);
   }
 };
 
