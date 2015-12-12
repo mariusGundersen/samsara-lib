@@ -35,14 +35,14 @@ describe("getSpiritNames", function() {
   });
 
   it("should read dir from the right directory", function(){
-    fs.readdir.should.have.been.calledWith('config/spirits');  
+    fs.readdir.should.have.been.calledWith('config/spirits');
   });
 
   it("should get all containers that are spirits", function(){
     docker.listContainers.should.have.been.calledWith({
-      all: true, 
+      all: true,
       filters: '{"label":["samsara.spirit.life","samsara.spirit.name"]}'
-    });  
+    });
   });
   
   it("should return names which are both containers and directories", function(){
