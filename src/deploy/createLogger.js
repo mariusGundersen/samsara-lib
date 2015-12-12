@@ -5,16 +5,16 @@ module.exports = function createLogger(name){
   return {
     eventEmitter: eventEmitter,
     start(life, plan){
-      eventEmitter.emit('start', {spirit: name, life: life, plan: plan});
+      return Promise.resolve().then(() => eventEmitter.emit('start', {spirit: name, life: life, plan: plan}));
     },
     message(message){
-      eventEmitter.emit('message', {spirit: name, message: message});
+      return Promise.resolve().then(() => eventEmitter.emit('message', {spirit: name, message: message}));
     },
     stage(){
-      eventEmitter.emit('stage', {spirit: name});
+      return Promise.resolve().then(() => eventEmitter.emit('stage', {spirit: name}));
     },
     stop(error){
-      eventEmitter.emit('stop', {spirit: name, error: error});
+      return Promise.resolve().then(() => eventEmitter.emit('stop', {spirit: name, error: error}));
     }
   }
 }
