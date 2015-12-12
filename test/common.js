@@ -11,7 +11,5 @@ global.swallow = function (thrower) {
   } catch (e) { }
 };
 
-process.on("unhandledRejection", function (err) { throw err; })
-
 var sinonChai = require("sinon-chai");
 chai.use(sinonChai);
