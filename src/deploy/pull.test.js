@@ -18,8 +18,10 @@ describe("pull", function(){
       this.stream = {};
       this.docker = {
         pull: jar.probe('pull'),
-        modem: {
-          followProgress: jar.probe('followProgress')
+        $subject: {
+          modem: {
+            followProgress: jar.sensor('followProgress')
+          }
         }
       };
     });
@@ -32,8 +34,8 @@ describe("pull", function(){
       this.docker.pull.resolves(this.stream);
       yield this.docker.pull.called(withExactArgs('test:latest'));
 
-      this.docker.modem.followProgress.resolves(null);
-      yield this.docker.modem.followProgress.called(withArgs(this.stream));
+      const call = yield this.docker.$subject.modem.followProgress.called(withArgs(this.stream));
+      call.args[1](null, true);
 
       yield this.logSpy.called(withExactArgs('Pulled image test:latest'));
 

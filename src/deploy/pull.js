@@ -8,5 +8,11 @@ module.exports = co.wrap(function*(image, tag, docker, log){
 });
 
 function followProgress(docker, stream, progress){
-  return docker.modem.followProgress(stream, progress);
+  return new Promise(function(resolve, reject){
+    docker.$subject.modem.followProgress(stream, function(err, output){
+      if(err) return reject(err);
+
+      resolve(output);
+    }, progress);
+  });
 }
