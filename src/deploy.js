@@ -25,7 +25,7 @@ const deploy = co.wrap(function* (spirit, docker, log){
 
   try{
     yield deployLock.lock(spirit.name);
-    log.message('deploy lock gained');
+    log.message('Deploy lock gained');
   }catch(e){
     log.message(e);
     log.stop(e);
@@ -37,7 +37,9 @@ const deploy = co.wrap(function* (spirit, docker, log){
     yield pull(config.image, config.tag, docker, log.message);
 
     log.stage();
+    log.message('Creating config');
     const dockerConfig = yield createContainerConfig(spirit.name, nextLife, config, name => new Spirit(name, docker));
+    log.message('Config created');
     const containerToStart = yield docker.createContainer(dockerConfig);
     const containerToStop = yield getContainerToStop(currentLife);
 
