@@ -20,10 +20,11 @@ describe('createLogger', function(){
         event.spirit.should.equal('something');
         event.life.should.equal(15);
         event.plan.should.deep.equal(['test', 'done']);
+        event.config.should.deep.equal({});
         done();
       });
 
-      this.logger.start(15, ['test', 'done']);
+      this.logger.start(15, ['test', 'done'], {});
     });
 
     it('should emit the right message', function(done){
