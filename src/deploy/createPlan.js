@@ -15,7 +15,7 @@ module.exports = {
       }
     });
   },
-  reincarnate(config){
+  revive(config){
     return spread(function*(){
       if(config.deploymentMethod === 'stop-before-start'){
         yield 'stop';

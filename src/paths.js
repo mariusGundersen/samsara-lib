@@ -6,6 +6,7 @@ const CONFIG_SPIRITS = 'config/spirits';
 const LIVES = 'lives';
 const DEPLOY_LOCK = 'deploy.lock';
 const CONFIG_JSON = 'config.json';
+const DEPLOY_LOG = 'deploy.log';
 
 module.exports = {
   spirits(){
@@ -28,5 +29,8 @@ module.exports = {
   },
   spiritLifeConfig(name, life){
     return path.join(CONFIG_SPIRITS, name, LIVES, life, CONFIG_JSON);
+  },
+  spiritLifeDeployLog(name, life){
+    return path.join(CONFIG_SPIRITS, name, LIVES, life, DEPLOY_LOG);
   }
 };
