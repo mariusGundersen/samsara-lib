@@ -25,6 +25,19 @@ module.exports = class Life{
       ? Life.STATUS_ALIVE
       : Life.STATUS_DEAD);
   }
+  get uptime(){
+    return this.docker.listContainers({
+      all: true,
+      filters: JSON.stringify({
+        label:[
+          `samsara.spirit.life=${this.life}`,
+          `samsara.spirit.name=${this.name}`
+        ]
+      })
+    }).then(containers => containers.map(container => /^(Exited\s\(\d+\)\s|^Up\s)(.*)/.exec(container.Status)))
+    .then(matches => matches.filter(match => match))
+    .then(matches => matches.map(match => match[2])[0] || ' ');
+  }
   get config(){
     return fs.readFile(pathTo.spiritLifeConfig(this.name, this.life))
       .then(result => JSON.parse(result));
