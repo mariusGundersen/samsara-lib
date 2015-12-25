@@ -6,7 +6,7 @@ describe("createPlan", function(){
   });
 
   it("should have a method for creating a reincarnation plan", function(){
-    createPlan.reincarnate.should.exist;
+    createPlan.revive.should.exist;
   });
 
   describe("deploy", function(){
@@ -41,24 +41,24 @@ describe("createPlan", function(){
     });
   });
 
-  describe("reincarnate", function(){
+  describe("revive", function(){
     describe("with start before stop", function(){
       it("should have 2 items", function(){
-        createPlan.reincarnate({deploymentMethod:'start-before-stop'}).length.should.equal(2);
+        createPlan.revive({deploymentMethod:'start-before-stop'}).length.should.equal(2);
       });
 
       it("should have the right order", function(){
-        createPlan.reincarnate({deploymentMethod:'start-before-stop'}).should.eql(["start", "stop"]);
+        createPlan.revive({deploymentMethod:'start-before-stop'}).should.eql(["start", "stop"]);
       });
     });
 
     describe("with stop before start", function(){
       it("should have 2 items", function(){
-        createPlan.reincarnate({deploymentMethod:'stop-before-start'}).length.should.equal(2);
+        createPlan.revive({deploymentMethod:'stop-before-start'}).length.should.equal(2);
       });
 
       it("should have the right order", function(){
-        createPlan.reincarnate({deploymentMethod:'stop-before-start'}).should.eql(["stop", "start"]);
+        createPlan.revive({deploymentMethod:'stop-before-start'}).should.eql(["stop", "start"]);
       });
     });
   });
