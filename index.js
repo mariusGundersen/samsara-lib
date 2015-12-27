@@ -1,6 +1,7 @@
 'use strict'
 const Docker = require('dockerode-promise');
 
+const getNonSpiritContainers = require('./src/getNonSpiritContainers');
 const getSpiritNames = require('./src/getSpiritNames');
 const Spirit = require('./src/Spirit');
 const createSpirit = require('./src/createSpirit');
@@ -20,6 +21,12 @@ module.exports = function(options){
     },
     createSpirit(name, image, tag){
       return createSpirit(name, image, tag);
+    },
+    containers(){
+      return getNonSpiritContainers(docker);
+    },
+    container(id){
+      return docker.getContainer(id);
     }
   };
 };
