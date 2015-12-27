@@ -1,4 +1,5 @@
 test
+src
 .gitignore
 *.test.js
 config

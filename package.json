@@ -2,7 +2,7 @@
   "name": "samsara-lib",
   "version": "5.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "lib/index.js",
   "dependencies": {
     "ansi-to-html": "^0.3.0",
     "co": "^4.5.4",
@@ -13,6 +13,9 @@
     "mkdirp-promise": "^1.0.2"
   },
   "devDependencies": {
+    "babel-cli": "^6.3.17",
+    "babel-plugin-transform-async-to-module-method": "^6.3.13",
+    "babel-preset-es2015-node4": "^2.0.2",
     "chai": "^3.0.0",
     "descartes": "~0.0.9",
     "mocha": "^2.2.5",
@@ -20,7 +23,9 @@
     "sinon-chai": "^2.8.0"
   },
   "scripts": {
-    "test": "node node_modules/mocha/bin/_mocha test/**/*.js src/*.test.js src/**/*.test.js"
+    "test": "node node_modules/mocha/bin/_mocha test/**/*.js src/**/*.test.js",
+    "compile": "babel -d lib/ src/",
+    "prepublish": "npm run compile"
   },
   "repository": {
     "type": "git",

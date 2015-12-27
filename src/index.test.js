@@ -1,5 +1,5 @@
 'use strict'
-const samsara = require('../index');
+const samsara = require('./index');
 const co = require('co');
 const sinon = require('sinon');
 

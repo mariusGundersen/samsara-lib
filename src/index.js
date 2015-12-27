@@ -1,6 +1,5 @@
 'use strict'
 const Docker = require('dockerode-promise');
-
 const getNonSpiritContainers = require('./src/getNonSpiritContainers');
 const getSpirits = require('./src/getSpirits');
 const Spirit = require('./src/Spirit');
