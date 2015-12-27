@@ -1,7 +1,5 @@
-'use strict'
-const samsara = require('./index');
-const co = require('co');
-const sinon = require('sinon');
+import samsara from './index';
+import sinon from 'sinon';
 
 describe("the module", function(){
   it("should export a function", function(){

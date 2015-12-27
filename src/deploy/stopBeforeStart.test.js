@@ -1,7 +1,6 @@
-const stopBeforeStart = require('./stopBeforeStart');
-const sinon = require('sinon');
-const co = require('co');
-const descartes = require('descartes');
+import stopBeforeStart from './stopBeforeStart';
+import sinon from 'sinon';
+import {Jar, withArgs, withExactArgs} from 'descartes';
 
 describe("stopBeforeStart", function(){
   it("should be a function", function(){
@@ -10,7 +9,7 @@ describe("stopBeforeStart", function(){
 
   describe("when called", function(){
     beforeEach(function(){
-      const jar = new descartes.Jar();
+      const jar = new Jar();
       this.startSpy = jar.probe('containerToStart.start');
       this.stopSpy = jar.probe('containerToStop.stop');
       this.restartSpy = jar.probe('containerToStop.start');
@@ -18,156 +17,156 @@ describe("stopBeforeStart", function(){
       this.stageSpy = jar.sensor('log.stage');
     });
 
-    it("should do things in the right order", co.wrap(function*(){
+    it("should do things in the right order", async function(){
       stopBeforeStart({stop: this.stopSpy, id: 'stopId'}, {start: this.startSpy, id: 'startId'}, {message: this.logSpy, stage: this.stageSpy});
 
-      yield this.logSpy.called(descartes.withArgs('Stopping previous container'));
+      await this.logSpy.called(withArgs('Stopping previous container'));
 
-      yield this.stopSpy.called();
+      await this.stopSpy.called();
 
-      yield this.logSpy.called(descartes.withArgs('Container stopId stopped'));
+      await this.logSpy.called(withArgs('Container stopId stopped'));
 
-      yield this.stageSpy.called();
+      await this.stageSpy.called();
 
-      yield this.logSpy.called(descartes.withArgs('Starting new container'));
+      await this.logSpy.called(withArgs('Starting new container'));
 
-      yield this.startSpy.called();
+      await this.startSpy.called();
 
-      yield this.logSpy.called(descartes.withArgs('Container startId started'));
-    }));
+      await this.logSpy.called(withArgs('Container startId started'));
+    });
 
     describe("without a container to stop", function(){
-      it("should not attempt to stop it", co.wrap(function*(){
+      it("should not attempt to stop it", async function(){
         stopBeforeStart(null, {start: this.startSpy, id: 'startId'}, {message: this.logSpy, stage: this.stageSpy});
 
-        yield this.logSpy.called(descartes.withArgs('No container to stop'));
+        await this.logSpy.called(withArgs('No container to stop'));
 
-        yield this.stageSpy.called();
+        await this.stageSpy.called();
 
-        yield this.logSpy.called(descartes.withArgs('Starting new container'));
+        await this.logSpy.called(withArgs('Starting new container'));
 
-        yield this.startSpy.called();
+        await this.startSpy.called();
 
-        yield this.logSpy.called(descartes.withArgs('Container startId started'));
-      }));
+        await this.logSpy.called(withArgs('Container startId started'));
+      });
 
       describe("and starting fails", function(){
-        it("should not attempt to restart it", co.wrap(function*(){
+        it("should not attempt to restart it", async function(){
           const result = stopBeforeStart(null, {start: this.startSpy}, {message: this.logSpy, stage: this.stageSpy});
 
-          yield this.logSpy.called(descartes.withArgs('No container to stop'));
+          await this.logSpy.called(withArgs('No container to stop'));
 
-          yield this.stageSpy.called();
+          await this.stageSpy.called();
 
-          yield this.logSpy.called(descartes.withArgs('Starting new container'));
+          await this.logSpy.called(withArgs('Starting new container'));
 
           this.startSpy.rejects(new Error());
-          yield this.startSpy.called();
+          await this.startSpy.called();
 
-          yield this.logSpy.called(descartes.withArgs('Could not start new container'));
+          await this.logSpy.called(withArgs('Could not start new container'));
 
           try{
-            yield result;
+            await result;
           }catch(e){
             e.should.be.a('Error');
           }
-        }));
+        });
       });
     });
 
     describe("and stopping fails", function(){
-      it("should abort", co.wrap(function*(){
+      it("should abort", async function(){
         const result = stopBeforeStart({stop: this.stopSpy}, {start: this.startSpy}, {message: this.logSpy, stage: this.stageSpy});
 
-        yield this.logSpy.called(descartes.withArgs('Stopping previous container'));
+        await this.logSpy.called(withArgs('Stopping previous container'));
 
         this.stopSpy.rejects(new Error());
-        yield this.stopSpy.called();
+        await this.stopSpy.called();
 
         try{
-          yield result;
+          await result;
         }catch(e){
           e.should.be.a('Error');
         }
-      }));
+      });
     });
 
     describe("and starting fails", function(){
-      it("should attempt to restart the stop container", co.wrap(function*(){
+      it("should attempt to restart the stop container", async function(){
         const result = stopBeforeStart({stop: this.stopSpy, start: this.restartSpy, id: 'stopId'}, {start: this.startSpy}, {message: this.logSpy, stage: this.stageSpy});
 
-        yield this.logSpy.called(descartes.withArgs('Stopping previous container'));
+        await this.logSpy.called(withArgs('Stopping previous container'));
 
-        yield this.stopSpy.called();
+        await this.stopSpy.called();
 
-        yield this.logSpy.called(descartes.withArgs('Container stopId stopped'));
+        await this.logSpy.called(withArgs('Container stopId stopped'));
 
-        yield this.stageSpy.called();
+        await this.stageSpy.called();
 
-        yield this.logSpy.called(descartes.withArgs('Starting new container'));
+        await this.logSpy.called(withArgs('Starting new container'));
 
         this.startSpy.rejects(new Error());
-        yield this.startSpy.called();
+        await this.startSpy.called();
 
-        yield this.logSpy.called(descartes.withArgs('Could not start new container'));
+        await this.logSpy.called(withArgs('Could not start new container'));
 
-        yield this.logSpy.called();
+        await this.logSpy.called();
 
-        yield this.logSpy.called(descartes.withArgs('Attempting to rollback'));
+        await this.logSpy.called(withArgs('Attempting to rollback'));
 
-        yield this.logSpy.called(descartes.withArgs('Starting previous container'));
+        await this.logSpy.called(withArgs('Starting previous container'));
 
-        yield this.restartSpy.called();
+        await this.restartSpy.called();
 
-        yield this.logSpy.called(descartes.withArgs('Previous container started'));
+        await this.logSpy.called(withArgs('Previous container started'));
 
         try{
-          yield result;
+          await result;
         }catch(e){
           e.should.be.a('Error');
         }
-      }));
+      });
     });
 
     describe("and restarting fails", function(){
-      it("should attempt to restart the stop container", co.wrap(function*(){
+      it("should attempt to restart the stop container", async function(){
         const result = stopBeforeStart({stop: this.stopSpy, start: this.restartSpy, id: 'stopId'}, {start: this.startSpy}, {message: this.logSpy, stage: this.stageSpy});
 
-        yield this.logSpy.called(descartes.withArgs('Stopping previous container'));
+        await this.logSpy.called(withArgs('Stopping previous container'));
 
-        yield this.stopSpy.called();
+        await this.stopSpy.called();
 
-        yield this.logSpy.called(descartes.withArgs('Container stopId stopped'));
+        await this.logSpy.called(withArgs('Container stopId stopped'));
 
-        yield this.stageSpy.called();
+        await this.stageSpy.called();
 
-        yield this.logSpy.called(descartes.withArgs('Starting new container'));
+        await this.logSpy.called(withArgs('Starting new container'));
 
         this.startSpy.rejects(new Error());
-        yield this.startSpy.called();
+        await this.startSpy.called();
 
-        yield this.logSpy.called(descartes.withArgs('Could not start new container'));
+        await this.logSpy.called(withArgs('Could not start new container'));
 
-        yield this.logSpy.called();
+        await this.logSpy.called();
 
-        yield this.logSpy.called(descartes.withArgs('Attempting to rollback'));
+        await this.logSpy.called(withArgs('Attempting to rollback'));
 
-        yield this.logSpy.called(descartes.withArgs('Starting previous container'));
+        await this.logSpy.called(withArgs('Starting previous container'));
 
         this.restartSpy.rejects(new Error());
-        yield this.restartSpy.called();
+        await this.restartSpy.called();
 
-        yield this.logSpy.called(descartes.withArgs('Failed to rollback to previous container'));
+        await this.logSpy.called(withArgs('Failed to rollback to previous container'));
 
-        yield this.logSpy.called();
+        await this.logSpy.called();
 
         try{
-          yield result;
+          await result;
         }catch(e){
           e.should.be.a('Error');
           e.innerException.should.be.an('Error');
         }
-      }));
+      });
     });
   });
 });

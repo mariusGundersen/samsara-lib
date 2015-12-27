@@ -1,17 +1,17 @@
-const createContainerConfig = require('./createContainerConfig');
-const ContainerConfig = require('../ContainerConfig');
-const sinon = require('sinon');
-const descartes = require('descartes');
-const co = require('co');
-const u = require('../util/unindent');
+import createContainerConfig from './createContainerConfig';
+import ContainerConfig from '../ContainerConfig';
+import sinon from 'sinon';
+import {Jar, probe, withArgs, withExactArgs} from 'descartes';
+
+import u from '../util/unindent';
 
 describe("createContainerConfig", function(){
   it("should be a function", function(){
     createContainerConfig.should.be.a('Function');
   });
 
-  it("should have the image and name", co.wrap(function *(){
-    const result = yield createContainerConfig('test', 2, new ContainerConfig('test', u`
+  it("should have the image and name", async function(){
+    const result = await createContainerConfig('test', 2, new ContainerConfig('test', u`
       test:
         image: 'nginx:latest'
     `), _ => _);
@@ -32,10 +32,10 @@ describe("createContainerConfig", function(){
         PortBindings: {}
       }
     });
-  }));
+  });
 
-  it("should have the correct environment as array values", co.wrap(function *(){
-    const result = yield createContainerConfig('test', 2, new ContainerConfig('test', u`
+  it("should have the correct environment as array values", async function(){
+    const result = await createContainerConfig('test', 2, new ContainerConfig('test', u`
       test:
         image: 'nginx:latest'
         environment:
@@ -60,10 +60,10 @@ describe("createContainerConfig", function(){
         PortBindings: {}
       }
     });
-  }));
+  });
 
-  it("should have the correct volumes values", co.wrap(function *(){
-    const result = yield createContainerConfig('test', 2, new ContainerConfig('test', u`
+  it("should have the correct volumes values", async function(){
+    const result = await createContainerConfig('test', 2, new ContainerConfig('test', u`
       test:
         image: 'nginx:latest'
         volumes:
@@ -99,10 +99,10 @@ describe("createContainerConfig", function(){
         PortBindings: {}
       }
     });
-  }));
+  });
 
-  it("should have the correct links values", co.wrap(function *(){
-    const getCurrentLife = descartes.probe('getCurrentLife');
+  it("should have the correct links values", async function(){
+    const getCurrentLife = probe('getCurrentLife');
 
     const result = createContainerConfig('test', 2, new ContainerConfig('test', u`
       test:
@@ -123,16 +123,16 @@ describe("createContainerConfig", function(){
         id:'1234abcd'
       })
     });
-    yield getCurrentLife.called(descartes.withArgs('db'));
+    await getCurrentLife.called(withArgs('db'));
 
     getCurrentLife.resolves({
       container: Promise.resolve({
         id:'abcd1234'
       })
     });
-    yield getCurrentLife.called(descartes.withArgs('db'));
+    await getCurrentLife.called(withArgs('db'));
 
-    (yield result).should.deep.equal({
+    (await result).should.deep.equal({
       name: 'test_v2',
       Image: 'nginx:latest',
       Env: [],
@@ -153,10 +153,10 @@ describe("createContainerConfig", function(){
         PortBindings: {}
       }
     });
-  }));
+  });
 
-  it("should have the correct port bindings", co.wrap(function *(){
-    const result = yield createContainerConfig('test', 2, new ContainerConfig('test', u`
+  it("should have the correct port bindings", async function(){
+    const result = await createContainerConfig('test', 2, new ContainerConfig('test', u`
       test:
         image: 'nginx:latest'
         ports:
@@ -185,10 +185,10 @@ describe("createContainerConfig", function(){
         }
       }
     });
-  }));
+  });
 
-  it("should have the correct volumesFrom values", co.wrap(function *(){
-    const getCurrentLife = descartes.probe('getCurrentLife');
+  it("should have the correct volumesFrom values", async function(){
+    const getCurrentLife = probe('getCurrentLife');
 
     const result = createContainerConfig('test', 2, new ContainerConfig('test', u`
       test:
@@ -209,16 +209,16 @@ describe("createContainerConfig", function(){
         id:'1234abcd'
       })
     });
-    yield getCurrentLife.called(descartes.withArgs('db'));
+    await getCurrentLife.called(withArgs('db'));
 
     getCurrentLife.resolves({
       container: Promise.resolve({
         id:'abcd1234'
       })
     });
-    yield getCurrentLife.called(descartes.withArgs('config'));
+    await getCurrentLife.called(withArgs('config'));
 
-    (yield result).should.deep.equal({
+    (await result).should.deep.equal({
       name: 'test_v2',
       Image: 'nginx:latest',
       Env: [],
@@ -239,5 +239,5 @@ describe("createContainerConfig", function(){
         PortBindings: {}
       }
     });
-  }));
+  });
 });

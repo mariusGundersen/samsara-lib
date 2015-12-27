@@ -1,55 +1,52 @@
-'use strict'
+import fs from 'fs-promise';
+import mkdirp from 'mkdirp-promise';
+import paths from '../paths';
 
-const co = require('co');
-const fs = require('fs-promise');
-const mkdirp = require('mkdirp-promise');
-const paths = require('../paths');
-
-module.exports = function(eventEmitter){
+export default function(eventEmitter){
   let plan;
   let setLogStream;
   const logStream = new Promise(function(resolve){
     setLogStream = resolve;
   });
 
-  eventEmitter.on('start', co.wrap(function*(event){
+  eventEmitter.on('start', async function(event){
     try{
       plan = event.plan;
       const name = event.spirit;
       const life = event.life+'';
-      yield mkdirp(paths.spiritLife(name, life));
-      yield event.containerConfig.saveLife(life);
+      await mkdirp(paths.spiritLife(name, life));
+      await event.containerConfig.saveLife(life);
       const stream = fs.createWriteStream(paths.spiritLifeDeployLog(name, life));
       stream.write(pad('deploy')+'\n');
       setLogStream(stream);
     }catch(e){
       console.error(e);
     }
-  }));
+  });
 
-  eventEmitter.on('stage', co.wrap(function*(event){
-    const stream = yield logStream;
+  eventEmitter.on('stage', async function(event){
+    const stream = await logStream;
     const stage = plan.shift();
     stream.write(pad(stage)+'\n');
-  }));
+  });
 
-  eventEmitter.on('message', co.wrap(function*(event){
-    const stream = yield logStream;
+  eventEmitter.on('message', async function(event){
+    const stream = await logStream;
     if(typeof(event.message) == 'string'){
       stream.write(event.message + '\n');
     }else if(event.message.progress){
       stream.write(event.message.id + ': ' + event.message.status + ' ' + prettyProgress(event.message.progressDetail) + '\n');
     }
-  }));
+  });
 
-  eventEmitter.on('stop', co.wrap(function*(event){
-    const stream = yield logStream;
+  eventEmitter.on('stop', async function(event){
+    const stream = await logStream;
     stream.write(pad(event.error ? 'failed' : 'done')+'\n');
     if(event.error){
       stream.write(event.error.message);
     }
     stream.end();
-  }));
+  });
 };
 
 function prettyProgress(progress){

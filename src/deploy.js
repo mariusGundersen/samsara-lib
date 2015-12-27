@@ -1,31 +1,29 @@
-'use strict'
+import createLogger from './deploy/createLogger';
+import {deploy as deployPlan} from './deploy/createPlan';
+import {lock, unlock} from './deploy/deployLock';
+import pull from './deploy/pull';
+import createContainerConfig from './deploy/createContainerConfig';
+import startBeforeStop from './deploy/startBeforeStop';
+import stopBeforeStart from './deploy/stopBeforeStart';
+import cleanupOldContainers from './deploy/cleanupOldContainers';
+import Spirit from './Spirit';
 
-const co = require('co');
-const createLogger = require('./deploy/createLogger');
-const createPlan = require('./deploy/createPlan');
-const deployLock = require('./deploy/deployLock');
-const pull = require('./deploy/pull');
-const createContainerConfig = require('./deploy/createContainerConfig');
-const startBeforeStop = require('./deploy/startBeforeStop');
-const stopBeforeStart = require('./deploy/stopBeforeStart');
-const cleanupOldContainers = require('./deploy/cleanupOldContainers');
-
-module.exports = function(spirit, docker){
+export default function(spirit, docker){
   const log = createLogger(spirit.name);
   deploy(spirit, docker, log);
   return log.eventEmitter;
 };
 
-const deploy = co.wrap(function* (spirit, docker, log){
-  const containerConfig = yield spirit.containerConfig;
-  const spiritSettings = yield spirit.settings;
-  const latestLife = yield spirit.latestLife;
-  const currentLife = yield spirit.currentLife;
+async function deploy(spirit, docker, log){
+  const containerConfig = await spirit.containerConfig;
+  const spiritSettings = await spirit.settings;
+  const latestLife = await spirit.latestLife;
+  const currentLife = await spirit.currentLife;
   const nextLife = getNextLife(latestLife);
-  const plan = createPlan.deploy(spiritSettings);
+  const plan = deployPlan(spiritSettings);
 
   try{
-    yield deployLock.lock(spirit.name);
+    await lock(spirit.name);
     log.start(nextLife, plan, containerConfig);
     log.message('Deploy lock gained');
   }catch(e){
@@ -34,30 +32,29 @@ const deploy = co.wrap(function* (spirit, docker, log){
 
   try{
     log.stage();
-    yield pull(containerConfig.image+':'+containerConfig.tag, docker, log.message);
+    await pull(containerConfig.image+':'+containerConfig.tag, docker, log.message);
 
     log.stage();
     log.message('Creating config');
-    const dockerConfig = yield createContainerConfig(spirit.name, nextLife, containerConfig, name => {
-      const Spirit = require('./Spirit');
+    const dockerConfig = await createContainerConfig(spirit.name, nextLife, containerConfig, name => {
       return new Spirit(name, docker)
     });
     log.message('Config created');
     log.message('Creating container');
-    const containerToStart = yield docker.createContainer(dockerConfig);
-    const containerToStop = yield getContainerToStop(currentLife);
+    const containerToStart = await docker.createContainer(dockerConfig);
+    const containerToStop = await getContainerToStop(currentLife);
     log.message(`Container ${containerToStart.id} created`);
 
     log.stage();
     if(spiritSettings.deploymentMethod === 'stop-before-start'){
-      yield stopBeforeStart(containerToStop, containerToStart, log);
+      await stopBeforeStart(containerToStop, containerToStart, log);
     }else{
-      yield startBeforeStop(containerToStart, containerToStop, log);
+      await startBeforeStop(containerToStart, containerToStop, log);
     }
 
     if(spiritSettings.cleanupLimit > 0){
       log.stage();
-      yield cleanupOldContainers(yield spirit.lives, nextLife - spiritSettings.cleanupLimit, docker, log.message);
+      await cleanupOldContainers(await spirit.lives, nextLife - spiritSettings.cleanupLimit, docker, log.message);
     }
 
     log.stop();
@@ -65,9 +62,9 @@ const deploy = co.wrap(function* (spirit, docker, log){
     log.message(e);
     log.stop(e);
   }finally{
-    yield deployLock.unlock(spirit.name);
+    await unlock(spirit.name);
   }
-});
+};
 
 function getNextLife(latestLife){
   const life = (latestLife || {life:0}).life || 0;

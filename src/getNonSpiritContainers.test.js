@@ -1,15 +1,13 @@
-'use strict'
-const getNonSpiritContainers = require('./getNonSpiritContainers');
-const co = require('co');
-const descartes = require('descartes');
-const sinon = require("sinon");
+import getNonSpiritContainers from './getNonSpiritContainers';
+import {Jar, withArgs, withExactArgs} from 'descartes';
+import sinon from 'sinon';
 
 describe("getNonSpiritContainers", function() {
   let result,
       docker;
 
-  it("should return only containers without labels", co.wrap(function*(){
-    const jar = new descartes.Jar();
+  it("should return only containers without labels", async function(){
+    const jar = new Jar();
     const listContainers = jar.probe('docker.listContainers');
 
     const result = getNonSpiritContainers({
@@ -21,12 +19,12 @@ describe("getNonSpiritContainers", function() {
       {Id: 'abc1235', Status: 'Up', Names: ['/Mail']},
       {Id: 'abc1236', Status: 'Up', Names: ['/database_v1'], Labels:{'samsara.spirit.name':'database'}}
     ]);
-    const call = yield listContainers.called();
+    const call = await listContainers.called();
     call.args[0].should.eql({all:true});
 
-    const containers = yield result;
+    const containers = await result;
 
     containers.length.should.equal(1);
     containers[0].id.should.equal('abc1235');
-  }));
+  });
 });

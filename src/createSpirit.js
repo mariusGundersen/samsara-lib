@@ -1,10 +1,9 @@
-const co = require('co');
-const fs = require('fs-promise');
-const mkdirp = require('mkdirp-promise');
-const yaml = require('js-yaml');
-const pathTo = require('./paths');
+import fs from 'fs-promise';
+import mkdirp from 'mkdirp-promise';
+import yaml from 'js-yaml';
+import {spirit, spiritLives, spiritContainerConfig, spiritSettingsJson} from './paths';
 
-module.exports = co.wrap(function *(name, image, tag){
+export default async function(name, image, tag){
   const spiritSettings = {
     name: name,
     deploymentMethod: 'start-before-stop',
@@ -22,8 +21,8 @@ module.exports = co.wrap(function *(name, image, tag){
     image: image+':'+tag
   };
 
-  yield mkdirp(pathTo.spirit(name));
-  yield mkdirp(pathTo.spiritLives(name));
-  yield fs.writeFile(pathTo.spiritContainerConfig(name), yaml.safeDump({[name]:containerConfig}));
-  yield fs.writeFile(pathTo.spiritSettingsJson(name), JSON.stringify(spiritSettings, null, '  '));
-});
+  await mkdirp(spirit(name));
+  await mkdirp(spiritLives(name));
+  await fs.writeFile(spiritContainerConfig(name), yaml.safeDump({[name]:containerConfig}));
+  await fs.writeFile(spiritSettingsJson(name), JSON.stringify(spiritSettings, null, '  '));
+};

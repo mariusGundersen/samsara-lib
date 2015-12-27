@@ -1,25 +1,25 @@
-module.exports = function statusToState(status){
+export default function statusToState(status){
   if(status === 'Dead'){
-    return module.exports.DEAD;
+    return DEAD;
   }
   if(status === 'Created'){
-    return module.exports.CREATED;
+    return CREATED;
   }
   if(/^Restarting/.test(status)){
-    return module.exports.RESTARTING;
+    return RESTARTING;
   }
   if(/^Up .* \(Paused\)$/.test(status)){
-    return module.exports.PAUSED;
+    return PAUSED;
   }
   if(/^Up/.test(status)){
-    return module.exports.RUNNING;
+    return RUNNING;
   }
-  return module.exports.EXITED;
+  return EXITED;
 };
 
-module.exports.PAUSED = 'paused';
-module.exports.RESTARTING = 'restarting';
-module.exports.RUNNING = 'running';
-module.exports.DEAD = 'dead';
-module.exports.CREATED = 'created';
-module.exports.EXITED = 'exited';
+export const PAUSED = 'paused';
+export const RESTARTING = 'restarting';
+export const RUNNING = 'running';
+export const DEAD = 'dead';
+export const CREATED = 'created';
+export const EXITED = 'exited';

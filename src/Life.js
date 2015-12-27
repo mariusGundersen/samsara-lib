@@ -1,14 +1,11 @@
-'use strict'
+import fs from 'fs-promise';
+import {spiritLifeContainerConfig, spiritLifeDeployLog} from './paths';
+import getSpiritLives from './getSpiritLives';
+import stream from 'stream';
+import prettifyLogs from './util/prettifyLogs';
+import statusToState, {DEAD} from './util/statusToState';
 
-const fs = require('fs-promise');
-const co = require('co');
-const pathTo = require('./paths');
-const getSpiritLives = require('./getSpiritLives');
-const stream = require('stream');
-const prettifyLogs = require('./util/prettifyLogs');
-const statusToState = require('./util/statusToState');
-
-module.exports = class Life{
+export default class Life{
   constructor(name, life, docker){
     this.name = name;
     this.life = life;
@@ -40,7 +37,7 @@ module.exports = class Life{
       })
     }).then(containers =>
       containers.length == 0
-      ? statusToState.DEAD
+      ? DEAD
       : statusToState(containers[0].Status));
   }
   get uptime(){
@@ -57,10 +54,10 @@ module.exports = class Life{
     .then(matches => matches.map(match => match[2])[0] || ' ');
   }
   get containerConfig(){
-    return fs.readFile(pathTo.spiritLifeContainerConfig(this.name, this.life), 'utf8');
+    return fs.readFile(spiritLifeContainerConfig(this.name, this.life), 'utf8');
   }
   get deployLog(){
-    return fs.readFile(pathTo.spiritLifeDeployLog(this.name, this.life), 'utf8');
+    return fs.readFile(spiritLifeDeployLog(this.name, this.life), 'utf8');
   }
   containerLog(html, options){
     return this.container

@@ -1,8 +1,6 @@
-'use strict'
-const Life = require('./Life');
-const fs = require('fs-promise');
-const co = require('co');
-const sinon = require("sinon");
+import Life from './Life';
+import fs from 'fs-promise';
+import sinon from 'sinon';
 
 describe("the Life", function() {
 
@@ -33,14 +31,14 @@ describe("the Life", function() {
     describe("containerConfig", function(){
       let result;
 
-      beforeEach(co.wrap(function*(){
+      beforeEach(async function(){
         sinon.stub(fs, 'readFile')
           .returns(Promise.resolve(`test:`));
 
         because: {
-          result = yield instance.containerConfig;
+          result = await instance.containerConfig;
         }
-      }));
+      });
 
       afterEach(function(){
         fs.readFile.restore();
@@ -58,7 +56,7 @@ describe("the Life", function() {
     describe("container", function(){
       let result;
 
-      beforeEach(co.wrap(function*(){
+      beforeEach(async function(){
         docker.listContainers.returns(Promise.resolve([
           {Id: 'abcd123'}
         ]));
@@ -68,9 +66,9 @@ describe("the Life", function() {
         }));
 
         because: {
-          result = yield instance.container;
+          result = await instance.container;
         }
-      }));
+      });
 
       it("should filter correctly", function(){
         docker.listContainers.should.have.been.calledWith({
@@ -91,14 +89,14 @@ describe("the Life", function() {
     describe("status stopped", function(){
       let result;
 
-      beforeEach(co.wrap(function*(){
+      beforeEach(async function(){
         docker.listContainers
           .returns(Promise.resolve([]));
 
         because: {
-          result = yield instance.status;
+          result = await instance.status;
         }
-      }));
+      });
 
       it("should filter correctly", function(){
         docker.listContainers.should.have.been.calledWith({
@@ -114,14 +112,14 @@ describe("the Life", function() {
     describe("status running", function(){
       let result;
 
-      beforeEach(co.wrap(function*(){
+      beforeEach(async function(){
         docker.listContainers
           .returns(Promise.resolve([{}]));
 
         because: {
-          result = yield instance.status;
+          result = await instance.status;
         }
-      }));
+      });
 
       it("should filter correctly", function(){
         docker.listContainers.should.have.been.calledWith({

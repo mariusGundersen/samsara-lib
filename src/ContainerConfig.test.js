@@ -1,10 +1,7 @@
-'use strict'
-
-const co = require('co');
-const ContainerConfig = require('./ContainerConfig');
-const sinon = require('sinon');
-const fs = require('fs-promise');
-const u = require('./util/unindent');
+import ContainerConfig from './ContainerConfig';
+import sinon from 'sinon';
+import fs from 'fs-promise';
+import u from './util/unindent';
 
 describe("ContainerConfig", function() {
   it("should toString with the file contents", function(){
@@ -262,16 +259,16 @@ describe("ContainerConfig", function() {
       fs.writeFile.restore();
     });
 
-    it("should write the contents of the config to the right file", co.wrap(function *(){
+    it("should write the contents of the config to the right file", async function(){
       const containerConfig = new ContainerConfig('test', u`
         test:
           image: 'nginx:latest'
       `);
 
-      yield containerConfig.save();
+      await containerConfig.save();
 
       fs.writeFile.should.have.been.calledWith('config/spirits/test/containerConfig.yml', "test:\n  image: 'nginx:latest'\n");
-    }));
+    });
   });
 
   describe("saving life", function(){
@@ -283,15 +280,15 @@ describe("ContainerConfig", function() {
       fs.writeFile.restore();
     });
 
-    it("should write the contents of the config to the right file", co.wrap(function *(){
+    it("should write the contents of the config to the right file", async function(){
       const containerConfig = new ContainerConfig('test', u`
         test:
           image: 'nginx:latest'
       `);
 
-      yield containerConfig.saveLife('2');
+      await containerConfig.saveLife('2');
 
       fs.writeFile.should.have.been.calledWith('config/spirits/test/lives/2/containerConfig.yml', "test:\n  container_name: test_v2\n  image: 'nginx:latest'\n");
-    }));
+    });
   });
 });

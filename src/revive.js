@@ -1,27 +1,24 @@
-'use strict'
+import createLogger from './deploy/createLogger';
+import {revive as revivePlan} from './deploy/createPlan';
+import {lock, unlock} from './deploy/deployLock';
+import startBeforeStop from './deploy/startBeforeStop';
+import stopBeforeStart from './deploy/stopBeforeStart';
 
-const co = require('co');
-const createLogger = require('./deploy/createLogger');
-const createPlan = require('./deploy/createPlan');
-const deployLock = require('./deploy/deployLock');
-const startBeforeStop = require('./deploy/startBeforeStop');
-const stopBeforeStart = require('./deploy/stopBeforeStart');
-
-module.exports = function(spirit, life, docker){
+export default function(spirit, life, docker){
   const log = createLogger(spirit.name);
   revive(spirit, life, docker, log);
   return log.eventEmitter;
 };
 
-const revive = co.wrap(function* (spirit, life, docker, log){
-  const spiritSettings = yield spirit.settings;
-  const currentLife = yield spirit.currentLife;
+async function revive(spirit, life, docker, log){
+  const spiritSettings = await spirit.settings;
+  const currentLife = await spirit.currentLife;
   const nextLife = spirit.life(life);
-  const plan = createPlan.revive(spiritSettings);
+  const plan = revivePlan(spiritSettings);
   log.start(life, plan, null);
 
   try{
-    yield deployLock.lock(spirit.name);
+    await lock(spirit.name);
     log.message('Deploy lock gained');
   }catch(e){
     log.message(e);
@@ -31,14 +28,14 @@ const revive = co.wrap(function* (spirit, life, docker, log){
 
   try{
     log.stage();
-    const containerToStart = yield nextLife.container;
-    const containerToStop = yield getContainerToStop(currentLife);
+    const containerToStart = await nextLife.container;
+    const containerToStop = await getContainerToStop(currentLife);
 
     log.stage();
     if(spiritSettings.deploymentMethod === 'stop-before-start'){
-      yield stopBeforeStart(containerToStop, containerToStart, log);
+      await stopBeforeStart(containerToStop, containerToStart, log);
     }else{
-      yield startBeforeStop(containerToStart, containerToStop, log);
+      await startBeforeStop(containerToStart, containerToStop, log);
     }
 
     log.stop();
@@ -46,9 +43,9 @@ const revive = co.wrap(function* (spirit, life, docker, log){
     log.message(e);
     log.stop(e);
   }finally{
-    yield deployLock.unlock(spirit.name);
+    await unlock(spirit.name);
   }
-});
+};
 
 function getNextLife(latestLife){
   const life = (latestLife || {life:0}).life || 0;

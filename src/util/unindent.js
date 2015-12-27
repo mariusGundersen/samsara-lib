@@ -1,6 +1,4 @@
-'use strict'
-
-module.exports = function(){
+export default function(){
   const chunks = Array.prototype.shift.call(arguments);
   const values = Array.prototype.slice.call(arguments, 0);
 

@@ -1,10 +1,10 @@
-const sinon = require('sinon');
-const co = require('co');
-const descartes = require('descartes');
-const fs = require('fs-promise');
-const mkdirp = require('mkdirp-promise');
-const fileLogger = require('./fileLogger');
-const u = require('../util/unindent');
+import sinon from 'sinon';
+
+import {Jar, withArgs, withExactArgs} from 'descartes';
+import fs from 'fs-promise';
+import mkdirp from 'mkdirp-promise';
+import fileLogger from './fileLogger';
+import u from '../util/unindent';
 
 describe("fileLogger", function(){
   it("should be a function", function(){
@@ -13,7 +13,7 @@ describe("fileLogger", function(){
 
   describe.skip("when called", function(){
     beforeEach(function(){
-      const jar = this.jar = new descartes.Jar();
+      const jar = this.jar = new Jar();
       this.clock = sinon.useFakeTimers();
       this.onSpy = jar.sensor('eventEmitter.on');
       this.createWriteStreamSpy = jar.probe('createWriteStream');
@@ -30,13 +30,13 @@ describe("fileLogger", function(){
       fs.writeFile.restore();
     });
 
-    it("should do things in the right order", co.wrap(function*(){
+    it("should do things in the right order", async function(){
       const result = fileLogger({on: this.onSpy});
 
-      const startCall = yield this.onSpy.called(descartes.withArgs('start'));
-      const stageCall = yield this.onSpy.called(descartes.withArgs('stage'));
-      const messageCall = yield this.onSpy.called(descartes.withArgs('message'));
-      const stopCall = yield this.onSpy.called(descartes.withArgs('stop'));
+      const startCall = await this.onSpy.called(withArgs('start'));
+      const stageCall = await this.onSpy.called(withArgs('stage'));
+      const messageCall = await this.onSpy.called(withArgs('message'));
+      const stopCall = await this.onSpy.called(withArgs('stop'));
 
       const onStart = startCall.args[1];
       const onStage = stageCall.args[1];
@@ -45,17 +45,17 @@ describe("fileLogger", function(){
 
       onStart({spirit: 'test', life: 12, containerConfig: {image: 'nginx:latest'}});
 
-      yield this.writeFileSpy.called(descartes.withArgs('config/spirits/test/lives/12/containerConfig.yml', u`
+      await this.writeFileSpy.called(withArgs('config/spirits/test/lives/12/containerConfig.yml', u`
         test:
           image: 'nginx:latest'
         `));
 
       this.createWriteStreamSpy.resolves({write: this.writeSpy, end: this.endSpy});
-      yield this.createWriteStreamSpy.called(descartes.withArgs('config/spirits/test/lives/12/deploy.log'));
+      await this.createWriteStreamSpy.called(withArgs('config/spirits/test/lives/12/deploy.log'));
 
-      yield this.writeSpy.called();
+      await this.writeSpy.called();
 
       this.jar.done();
-    }));
+    });
   });
 });

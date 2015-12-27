@@ -1,11 +1,9 @@
-const co = require('co');
-
-module.exports = co.wrap(function*(image, docker, log){
+export default async function(image, docker, log){
   log(`Pulling image ${image}`);
-  const stream = yield docker.pull(image);
-  yield followProgress(docker, stream, event => log(event));
+  const stream = await docker.pull(image);
+  await followProgress(docker, stream, event => log(event));
   log(`Pulled image ${image}`);
-});
+};
 
 function followProgress(docker, stream, progress){
   return new Promise(function(resolve, reject){

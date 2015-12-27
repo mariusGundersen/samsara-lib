@@ -1,10 +1,9 @@
-const fs = require('fs-promise');
-const co = require('co');
-const mkdirp = require('mkdirp-promise');
-const pathTo = require('./paths');
+import fs from 'fs-promise';
+import mkdirp from 'mkdirp-promise';
+import {spiritLives, spiritLife} from './paths';
 
-module.exports = co.wrap(function*(name, docker){
-  const containers = yield docker.listContainers({
+export default async function(name, docker){
+  const containers = await docker.listContainers({
     all: true,
     filters: JSON.stringify({
       "label":[
@@ -14,17 +13,17 @@ module.exports = co.wrap(function*(name, docker){
     })
   });
 
-  yield mkdirp(pathTo.spiritLives(name));
+  await mkdirp(spiritLives(name));
 
-  const files = yield fs.readdir(pathTo.spiritLives(name));
-  const directories = yield files.filter(life => isDirectory(pathTo.spiritLife(name, life)));
+  const files = await fs.readdir(spiritLives(name));
+  const directories = await files.filter(life => isDirectory(spiritLife(name, life)));
 
   return directories
     .concat(containers
       .map(container => container.Labels['samsara.spirit.life'])
       .filter(container => directories.indexOf(container) === -1)
     ).sort((a,b) => a - b);
-});
+};
 
 function isDirectory(path){
   return fs.stat(path).then(stat => stat.isDirectory());

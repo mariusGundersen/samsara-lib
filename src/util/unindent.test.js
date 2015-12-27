@@ -1,4 +1,4 @@
-const u = require('./unindent');
+import u from './unindent';
 
 describe("unindent", function(){
   it("should remove leading whitespace", function(){

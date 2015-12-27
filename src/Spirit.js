@@ -1,16 +1,13 @@
-'use strict'
+import fs from 'fs-promise';
+import {spiritContainerConfig, spiritSettingsJson, spiritDeployLock} from './paths';
+import getSpiritLives from './getSpiritLives';
+import deploy from './deploy';
+import revive from './revive';
+import Life from './Life';
+import fileLogger from './deploy/fileLogger';
+import ContainerConfig from './ContainerConfig';
 
-const fs = require('fs-promise');
-const co = require('co');
-const pathTo = require('./paths');
-const getSpiritLives = require('./getSpiritLives');
-const deploy = require('./deploy');
-const revive = require('./revive');
-const Life = require('./Life');
-const fileLogger = require('./deploy/fileLogger');
-const ContainerConfig = require('./ContainerConfig');
-
-module.exports = class Spirit{
+export default class Spirit{
   constructor(name, docker){
     this.name = name;
     Object.defineProperty(this, 'docker', {value:docker});
@@ -30,11 +27,11 @@ module.exports = class Spirit{
       : Spirit.STATUS_DEAD);
   }
   get containerConfig(){
-    return fs.readFile(pathTo.spiritContainerConfig(this.name))
+    return fs.readFile(spiritContainerConfig(this.name))
     .then(result => new ContainerConfig(this.name, result));
   }
   get settings(){
-    return fs.readFile(pathTo.spiritSettingsJson(this.name))
+    return fs.readFile(spiritSettingsJson(this.name))
     .then(result => JSON.parse(result));
   }
   mutateSettings(mutator){
@@ -44,10 +41,10 @@ module.exports = class Spirit{
       return settings;
     })
     .then(settings => JSON.stringify(settings, null, '  '))
-    .then(json => fs.writeFile(pathTo.spiritSettingsJson(this.name), json));
+    .then(json => fs.writeFile(spiritSettingsJson(this.name), json));
   }
   get isDeploying(){
-    return fs.exists(pathTo.spiritDeployLock(this.name));
+    return fs.exists(spiritDeployLock(this.name));
   }
   get lives(){
     return getSpiritLives(this.name, this.docker)

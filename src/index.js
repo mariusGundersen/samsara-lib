@@ -1,13 +1,12 @@
-'use strict'
-const Docker = require('dockerode-promise');
-const getNonSpiritContainers = require('./src/getNonSpiritContainers');
-const getSpirits = require('./src/getSpirits');
-const Spirit = require('./src/Spirit');
-const createSpirit = require('./src/createSpirit');
-const upgrade = require('./src/upgrade');
-const prettifyLogs = require('./src/util/prettifyLogs')
+import Docker from 'dockerode-promise';
+import getNonSpiritContainers from './getNonSpiritContainers';
+import getSpirits from './getSpirits';
+import Spirit from './Spirit';
+import createSpirit from './createSpirit';
+import upgrade from './upgrade';
+import prettifyLogs from './util/prettifyLogs';
 
-module.exports = function(options){
+export default function samsara(options){
   options = options || {};
 
   var docker = options.docker || new Docker(options.dockerConfig);
