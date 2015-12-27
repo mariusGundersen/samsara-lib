@@ -1,6 +1,6 @@
 {
-	"editor.tabSize": "auto",
-	"editor.insertSpaces": "auto",
+	"editor.tabSize": 2,
+	"editor.insertSpaces": true,
 	"editor.renderWhitespace": true,
 	"files.trimTrailingWhitespace": true
 }
