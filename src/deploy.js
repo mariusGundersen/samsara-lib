@@ -23,14 +23,12 @@ const deploy = co.wrap(function* (spirit, docker, log){
   const currentLife = yield spirit.currentLife;
   const nextLife = getNextLife(latestLife);
   const plan = createPlan.deploy(config);
-  log.start(nextLife, plan, config);
 
   try{
     yield deployLock.lock(spirit.name);
+    log.start(nextLife, plan, config);
     log.message('Deploy lock gained');
   }catch(e){
-    log.message(e);
-    log.stop(e);
     return;
   }
 
