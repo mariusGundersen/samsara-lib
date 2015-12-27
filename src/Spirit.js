@@ -32,6 +32,15 @@ module.exports = class Spirit{
     return fs.readFile(pathTo.configJson(this.name))
     .then(result => JSON.parse(result));
   }
+  mutateConfig(mutator){
+    return this.config
+    .then(config => {
+      mutator(config);
+      return config;
+    })
+    .then(config => JSON.stringify(config, null, '  '))
+    .then(json => fs.writeFile(pathTo.configJson(this.name), json));
+  }
   get isDeploying(){
     return fs.exists(pathTo.deployLock(this.name));
   }
