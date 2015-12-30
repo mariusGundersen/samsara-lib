@@ -3,6 +3,7 @@
 const co = require('co');
 const fs = require('fs-promise');
 const mkdirp = require('mkdirp-promise');
+const yaml = require('js-yaml');
 const paths = require('../paths');
 
 module.exports = function(eventEmitter){
@@ -18,7 +19,9 @@ module.exports = function(eventEmitter){
       const name = event.spirit;
       const life = event.life+'';
       yield mkdirp(paths.life(name, life));
-      const containerConfig = JSON.stringify(event.containerConfig, null, '  ');
+      const containerConfig = yaml.safeDump({
+        [name]:event.containerConfig
+      });
       yield fs.writeFile(paths.spiritLifeContainerConfig(name, life), containerConfig);
       const stream = fs.createWriteStream(paths.spiritLifeDeployLog(name, life));
       stream.write(pad('deploy')+'\n');

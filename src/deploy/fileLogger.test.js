@@ -1,9 +1,10 @@
-const fileLogger = require('./fileLogger');
 const sinon = require('sinon');
 const co = require('co');
 const descartes = require('descartes');
 const fs = require('fs-promise');
 const mkdirp = require('mkdirp-promise');
+const fileLogger = require('./fileLogger');
+const u = require('../util/unindent');
 
 describe("fileLogger", function(){
   it("should be a function", function(){
@@ -42,9 +43,12 @@ describe("fileLogger", function(){
       const onMessage = messageCall.args[1];
       const onStop = stopCall.args[1];
 
-      onStart({spirit: 'test', life: 12, containerConfig: {name: 'test'}});
+      onStart({spirit: 'test', life: 12, containerConfig: {image: 'nginx:latest'}});
 
-      yield this.writeFileSpy.called(descartes.withArgs('config/spirits/test/lives/12/containerConfig.json', '{\n  "name": "test"\n}'));
+      yield this.writeFileSpy.called(descartes.withArgs('config/spirits/test/lives/12/containerConfig.yml', u`
+        test:
+          image: 'nginx:latest'
+        `));
 
       this.createWriteStreamSpy.resolves({write: this.writeSpy, end: this.endSpy});
       yield this.createWriteStreamSpy.called(descartes.withArgs('config/spirits/test/lives/12/deploy.log'));

@@ -9,6 +9,7 @@
     "dockerode-promise": "^0.1.0",
     "extend": "^3.0.0",
     "fs-promise": "^0.3.1",
+    "js-yaml": "^3.4.6",
     "mkdirp-promise": "^1.0.2"
   },
   "devDependencies": {

@@ -3,7 +3,7 @@ const Spirit = require('./Spirit');
 const fs = require('fs-promise');
 const co = require('co');
 const sinon = require("sinon");
-const expect = chai.expect;
+const u = require('./util/unindent');
 
 describe("the Spirit", function() {
 
@@ -53,7 +53,10 @@ describe("the Spirit", function() {
 
       beforeEach(co.wrap(function*(){
         sinon.stub(fs, 'readFile')
-          .returns(Promise.resolve(JSON.stringify({name:'test'})));
+          .returns(Promise.resolve(u`
+            test:
+              image: nginx:latest
+            `));
 
         because: {
           result = yield instance.containerConfig;
@@ -65,11 +68,11 @@ describe("the Spirit", function() {
       });
 
       it("should read the correct file", function(){
-        fs.readFile.should.have.been.calledWith('config/spirits/test/containerConfig.json');
+        fs.readFile.should.have.been.calledWith('config/spirits/test/containerConfig.yml');
       });
 
-      it("should return json", function(){
-        result.should.deep.equal({name:'test'});
+      it("should return yaml", function(){
+        result.should.deep.equal({image:'nginx:latest'});
       });
 
       describe("mutate", function(){
@@ -78,16 +81,19 @@ describe("the Spirit", function() {
             .returns(Promise.resolve());
 
           because: {
-            result = yield instance.mutateContainerConfig(config => config.name = 'hello');
+            result = yield instance.mutateContainerConfig(config => config.image = 'mysql:latest');
           }
         }));
 
         it("should read the correct file", function(){
-          fs.readFile.should.have.been.calledWith('config/spirits/test/containerConfig.json');
+          fs.readFile.should.have.been.calledWith('config/spirits/test/containerConfig.yml');
         });
 
         it("should write the correct file and content", function(){
-          fs.writeFile.should.have.been.calledWith('config/spirits/test/containerConfig.json', JSON.stringify({name: 'hello'}, null, '  '));
+          fs.writeFile.should.have.been.calledWith('config/spirits/test/containerConfig.yml', u`
+            test:
+              image: 'mysql:latest'
+            `);
         });
 
         afterEach(function(){

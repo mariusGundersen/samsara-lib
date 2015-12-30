@@ -3,7 +3,6 @@ const Life = require('./Life');
 const fs = require('fs-promise');
 const co = require('co');
 const sinon = require("sinon");
-const expect = chai.expect;
 
 describe("the Life", function() {
 
@@ -36,7 +35,7 @@ describe("the Life", function() {
 
       beforeEach(co.wrap(function*(){
         sinon.stub(fs, 'readFile')
-          .returns(Promise.resolve(JSON.stringify({name:'test'})));
+          .returns(Promise.resolve(`test:`));
 
         because: {
           result = yield instance.containerConfig;
@@ -48,11 +47,11 @@ describe("the Life", function() {
       });
 
       it("should read the correct file", function(){
-        fs.readFile.should.have.been.calledWith('config/spirits/test/lives/1/containerConfig.json');
+        fs.readFile.should.have.been.calledWith('config/spirits/test/lives/1/containerConfig.yml');
       });
 
-      it("should return json", function(){
-        result.should.deep.equal({name:'test'});
+      it("should return yaml", function(){
+        result.should.equal(`test:`);
       });
     });
 

@@ -2,6 +2,7 @@
 
 const fs = require('fs-promise');
 const co = require('co');
+const yaml = require('js-yaml');
 const pathTo = require('./paths');
 const getSpiritLives = require('./getSpiritLives');
 const deploy = require('./deploy');
@@ -29,8 +30,9 @@ module.exports = class Spirit{
       : Spirit.STATUS_DEAD);
   }
   get containerConfig(){
-    return fs.readFile(pathTo.spiritContainerConfigJson(this.name))
-    .then(result => JSON.parse(result));
+    return fs.readFile(pathTo.spiritContainerConfig(this.name))
+    .then(result => yaml.safeLoad(result))
+    .then(config => config[this.name]);
   }
   mutateContainerConfig(mutator){
     return this.containerConfig
@@ -38,8 +40,10 @@ module.exports = class Spirit{
       mutator(config);
       return config;
     })
-    .then(config => JSON.stringify(config, null, '  '))
-    .then(json => fs.writeFile(pathTo.spiritContainerConfigJson(this.name), json));
+    .then(config => yaml.safeDump({
+      [this.name]:config
+    }))
+    .then(yaml => fs.writeFile(pathTo.spiritContainerConfig(this.name), yaml));
   }
   get settings(){
     return fs.readFile(pathTo.spiritSettingsJson(this.name))
