@@ -39,7 +39,7 @@ module.exports = class Life{
     .then(matches => matches.map(match => match[2])[0] || ' ');
   }
   get containerConfig(){
-    return fs.readFile(pathTo.spiritLifeContainerConfig(this.name, this.life));
+    return fs.readFile(pathTo.spiritLifeContainerConfig(this.name, this.life), 'utf8');
   }
   get container(){
     return this.docker.listContainers({
