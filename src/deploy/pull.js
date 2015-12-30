@@ -1,10 +1,10 @@
 const co = require('co');
 
-module.exports = co.wrap(function*(image, tag, docker, log){
-  log(`Pulling image ${image}:${tag}`);
-  const stream = yield docker.pull(`${image}:${tag}`);
+module.exports = co.wrap(function*(image, docker, log){
+  log(`Pulling image ${image}`);
+  const stream = yield docker.pull(image);
   yield followProgress(docker, stream, event => log(event));
-  log(`Pulled image ${image}:${tag}`);
+  log(`Pulled image ${image}`);
 });
 
 function followProgress(docker, stream, progress){
