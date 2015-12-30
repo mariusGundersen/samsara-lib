@@ -18,15 +18,16 @@ module.exports = function(spirit, docker){
 };
 
 const deploy = co.wrap(function* (spirit, docker, log){
-  const config = yield spirit.config;
+  const containerConfig = yield spirit.containerConfig;
+  const spiritSettings = yield spirit.settings;
   const latestLife = yield spirit.latestLife;
   const currentLife = yield spirit.currentLife;
   const nextLife = getNextLife(latestLife);
-  const plan = createPlan.deploy(config);
+  const plan = createPlan.deploy(spiritSettings);
 
   try{
     yield deployLock.lock(spirit.name);
-    log.start(nextLife, plan, config);
+    log.start(nextLife, plan, containerConfig);
     log.message('Deploy lock gained');
   }catch(e){
     return;
@@ -34,25 +35,27 @@ const deploy = co.wrap(function* (spirit, docker, log){
 
   try{
     log.stage();
-    yield pull(config.image, config.tag, docker, log.message);
+    yield pull(containerConfig.image, containerConfig.tag, docker, log.message);
 
     log.stage();
     log.message('Creating config');
-    const dockerConfig = yield createContainerConfig(spirit.name, nextLife, config, name => new Spirit(name, docker));
+    const dockerConfig = yield createContainerConfig(spirit.name, nextLife, containerConfig, name => new Spirit(name, docker));
     log.message('Config created');
+    log.message('Creating container');
     const containerToStart = yield docker.createContainer(dockerConfig);
     const containerToStop = yield getContainerToStop(currentLife);
+    log.message('Container created');
 
     log.stage();
-    if(config.deploymentMethod === 'stop-before-start'){
+    if(spiritSettings.deploymentMethod === 'stop-before-start'){
       yield stopBeforeStart(containerToStop, containerToStart, log);
     }else{
       yield startBeforeStop(containerToStart, containerToStop, log);
     }
 
-    if(config.cleanupLimit > 0){
+    if(spiritSettings.cleanupLimit > 0){
       log.stage();
-      yield cleanupOldContainers(yield spirit.lives, nextLife - config.cleanupLimit, docker, log.message);
+      yield cleanupOldContainers(yield spirit.lives, nextLife - spiritSettings.cleanupLimit, docker, log.message);
     }
 
     log.stop();

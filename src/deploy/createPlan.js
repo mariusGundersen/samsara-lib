@@ -1,23 +1,23 @@
 module.exports = {
-  deploy(config){
+  deploy(spiritSettings){
     return spread(function*(){
       yield 'pull';
       yield 'create';
-      if(config.deploymentMethod === 'stop-before-start'){
+      if(spiritSettings.deploymentMethod === 'stop-before-start'){
         yield 'stop';
         yield 'start';
       }else{
         yield 'start';
         yield 'stop';
       }
-      if(config.cleanupLimit > 0){
+      if(spiritSettings.cleanupLimit > 0){
         yield 'cleanup';
       }
     });
   },
-  revive(config){
+  revive(spiritSettings){
     return spread(function*(){
-      if(config.deploymentMethod === 'stop-before-start'){
+      if(spiritSettings.deploymentMethod === 'stop-before-start'){
         yield 'stop';
         yield 'start';
       }else{

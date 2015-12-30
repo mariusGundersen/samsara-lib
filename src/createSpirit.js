@@ -4,10 +4,8 @@ const mkdirp = require('mkdirp-promise');
 const pathTo = require('./paths');
 
 module.exports = co.wrap(function *(name, image, tag){
-  const config = {
+  const spiritSettings = {
     name: name,
-    image: image,
-    tag: tag,
     deploymentMethod: 'start-before-stop',
     cleanupLimit: 10,
     description: '',
@@ -15,7 +13,12 @@ module.exports = co.wrap(function *(name, image, tag){
     webhook: {
       enable: false,
       secret: ''
-    },
+    }
+  };
+
+  const containerConfig = {
+    image: image,
+    tag: tag,
     raw: {},
     env: {},
     links: {},
@@ -23,8 +26,9 @@ module.exports = co.wrap(function *(name, image, tag){
     volumes: {},
     volumesFrom: []
   };
-  
+
   yield mkdirp(pathTo.spirit(name));
   yield mkdirp(pathTo.spiritLives(name));
-  yield fs.writeFile(pathTo.configJson(name), JSON.stringify(config, null, '  '));
+  yield fs.writeFile(pathTo.containerConfigJson(name), JSON.stringify(containerConfig, null, '  '));
+  yield fs.writeFile(pathTo.settingsJson(name), JSON.stringify(spiritSettings, null, '  '));
 });

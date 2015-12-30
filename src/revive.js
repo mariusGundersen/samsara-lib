@@ -14,11 +14,11 @@ module.exports = function(spirit, life, docker){
 };
 
 const revive = co.wrap(function* (spirit, life, docker, log){
-  const config = yield spirit.config;
+  const spiritSettings = yield spirit.settings;
   const currentLife = yield spirit.currentLife;
   const nextLife = spirit.life(life);
-  const plan = createPlan.revive(config);
-  log.start(life, plan, config);
+  const plan = createPlan.revive(spiritSettings);
+  log.start(life, plan, spiritSettings);
 
   try{
     yield deployLock.lock(spirit.name);
@@ -35,7 +35,7 @@ const revive = co.wrap(function* (spirit, life, docker, log){
     const containerToStop = yield getContainerToStop(currentLife);
 
     log.stage();
-    if(config.deploymentMethod === 'stop-before-start'){
+    if(spiritSettings.deploymentMethod === 'stop-before-start'){
       yield stopBeforeStart(containerToStop, containerToStart, log);
     }else{
       yield startBeforeStop(containerToStart, containerToStop, log);

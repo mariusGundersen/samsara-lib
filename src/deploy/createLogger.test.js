@@ -20,7 +20,7 @@ describe('createLogger', function(){
         event.spirit.should.equal('something');
         event.life.should.equal(15);
         event.plan.should.deep.equal(['test', 'done']);
-        event.config.should.deep.equal({});
+        event.containerConfig.should.deep.equal({});
         done();
       });
 

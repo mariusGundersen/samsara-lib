@@ -42,9 +42,9 @@ describe("fileLogger", function(){
       const onMessage = messageCall.args[1];
       const onStop = stopCall.args[1];
 
-      onStart({spirit: 'test', life: 12, config: {name: 'test'}});
+      onStart({spirit: 'test', life: 12, containerConfig: {name: 'test'}});
 
-      yield this.writeFileSpy.called(descartes.withArgs('config/spirits/test/lives/12/config.json', '{\n  "name": "test"\n}'));
+      yield this.writeFileSpy.called(descartes.withArgs('config/spirits/test/lives/12/containerConfig.json', '{\n  "name": "test"\n}'));
 
       this.createWriteStreamSpy.resolves({write: this.writeSpy, end: this.endSpy});
       yield this.createWriteStreamSpy.called(descartes.withArgs('config/spirits/test/lives/12/deploy.log'));

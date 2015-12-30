@@ -1,23 +1,23 @@
 const extend = require('extend');
 const co = require('co');
 
-module.exports = co.wrap(function*(name, life, config, getSpirit){
-  const links = yield makeLinks(getSpirit, config.links);
-  const volumes = yield makeVolumesFrom(getSpirit, config.volumesFrom);
+module.exports = co.wrap(function*(name, life, containerConfig, getSpirit){
+  const links = yield makeLinks(getSpirit, containerConfig.links);
+  const volumes = yield makeVolumesFrom(getSpirit, containerConfig.volumesFrom);
 
   return extend({
-    Image: config.image+':'+config.tag,
+    Image: containerConfig.image+':'+containerConfig.tag,
     name: name + '_v' + life,
-    Env: makeEnv(config.env),
-    Volumes: makeVolumes(config.volumes),
-    Labels: makeLabels(config.name, life),
+    Env: makeEnv(containerConfig.env),
+    Volumes: makeVolumes(containerConfig.volumes),
+    Labels: makeLabels(name, life),
     HostConfig: {
       Links: links,
-      Binds: makeBinds(config.volumes),
-      PortBindings: makePortBindings(config.ports),
+      Binds: makeBinds(containerConfig.volumes),
+      PortBindings: makePortBindings(containerConfig.ports),
       VolumesFrom: volumes
     }
-  }, config.raw);
+  }, containerConfig.raw);
 });
 
 function makeEnv(env){
