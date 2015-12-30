@@ -5,7 +5,8 @@ const path = require('path');
 const CONFIG_SPIRITS = 'config/spirits';
 const LIVES = 'lives';
 const DEPLOY_LOCK = 'deploy.lock';
-const CONFIG_JSON = 'config.json';
+const CONTAINER_CONFIG_JSON = 'containerConfig.json';
+const SETTINGS_JSON = 'settings.json';
 const DEPLOY_LOG = 'deploy.log';
 
 module.exports = {
@@ -15,8 +16,11 @@ module.exports = {
   spirit(name){
     return path.join(CONFIG_SPIRITS, name);
   },
-  configJson(name){
-    return path.join(CONFIG_SPIRITS, name, CONFIG_JSON);
+  containerConfigJson(name){
+    return path.join(CONFIG_SPIRITS, name, CONTAINER_CONFIG_JSON);
+  },
+  settingsJson(name){
+    return path.join(CONFIG_SPIRITS, name, SETTINGS_JSON);
   },
   deployLock(name){
     return path.join(CONFIG_SPIRITS, name, DEPLOY_LOCK);
@@ -27,8 +31,8 @@ module.exports = {
   life(name, life){
     return path.join(CONFIG_SPIRITS, name, LIVES, life);
   },
-  spiritLifeConfig(name, life){
-    return path.join(CONFIG_SPIRITS, name, LIVES, life, CONFIG_JSON);
+  spiritLifeContainerConfig(name, life){
+    return path.join(CONFIG_SPIRITS, name, LIVES, life, CONTAINER_CONFIG_JSON);
   },
   spiritLifeDeployLog(name, life){
     return path.join(CONFIG_SPIRITS, name, LIVES, life, DEPLOY_LOG);

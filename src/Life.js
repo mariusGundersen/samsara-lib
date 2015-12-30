@@ -38,8 +38,8 @@ module.exports = class Life{
     .then(matches => matches.filter(match => match))
     .then(matches => matches.map(match => match[2])[0] || ' ');
   }
-  get config(){
-    return fs.readFile(pathTo.spiritLifeConfig(this.name, this.life))
+  get containerConfig(){
+    return fs.readFile(pathTo.spiritLifeContainerConfig(this.name, this.life))
       .then(result => JSON.parse(result));
   }
   get container(){

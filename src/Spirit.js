@@ -28,18 +28,31 @@ module.exports = class Spirit{
       ? Spirit.STATUS_ALIVE
       : Spirit.STATUS_DEAD);
   }
-  get config(){
-    return fs.readFile(pathTo.configJson(this.name))
+  get containerConfig(){
+    return fs.readFile(pathTo.containerConfigJson(this.name))
     .then(result => JSON.parse(result));
   }
-  mutateConfig(mutator){
-    return this.config
+  mutateContainerConfig(mutator){
+    return this.containerConfig
     .then(config => {
       mutator(config);
       return config;
     })
     .then(config => JSON.stringify(config, null, '  '))
-    .then(json => fs.writeFile(pathTo.configJson(this.name), json));
+    .then(json => fs.writeFile(pathTo.containerConfigJson(this.name), json));
+  }
+  get settings(){
+    return fs.readFile(pathTo.settingsJson(this.name))
+    .then(result => JSON.parse(result));
+  }
+  mutateSettings(mutator){
+    return this.settings
+    .then(settings => {
+      mutator(settings);
+      return settings;
+    })
+    .then(settings => JSON.stringify(settings, null, '  '))
+    .then(json => fs.writeFile(pathTo.settingsJson(this.name), json));
   }
   get isDeploying(){
     return fs.exists(pathTo.deployLock(this.name));

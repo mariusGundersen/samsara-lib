@@ -48,7 +48,7 @@ describe("the Spirit", function() {
       });
     });
 
-    describe("config", function(){
+    describe("containerConfig", function(){
       let result;
 
       beforeEach(co.wrap(function*(){
@@ -56,7 +56,7 @@ describe("the Spirit", function() {
           .returns(Promise.resolve(JSON.stringify({name:'test'})));
 
         because: {
-          result = yield instance.config;
+          result = yield instance.containerConfig;
         }
       }));
 
@@ -65,7 +65,7 @@ describe("the Spirit", function() {
       });
 
       it("should read the correct file", function(){
-        fs.readFile.should.have.been.calledWith('config/spirits/test/config.json');
+        fs.readFile.should.have.been.calledWith('config/spirits/test/containerConfig.json');
       });
 
       it("should return json", function(){
@@ -78,16 +78,64 @@ describe("the Spirit", function() {
             .returns(Promise.resolve());
 
           because: {
-            result = yield instance.mutateConfig(config => config.name = 'hello');
+            result = yield instance.mutateContainerConfig(config => config.name = 'hello');
           }
         }));
 
         it("should read the correct file", function(){
-          fs.readFile.should.have.been.calledWith('config/spirits/test/config.json');
+          fs.readFile.should.have.been.calledWith('config/spirits/test/containerConfig.json');
         });
 
         it("should write the correct file and content", function(){
-          fs.writeFile.should.have.been.calledWith('config/spirits/test/config.json', JSON.stringify({name: 'hello'}, null, '  '));
+          fs.writeFile.should.have.been.calledWith('config/spirits/test/containerConfig.json', JSON.stringify({name: 'hello'}, null, '  '));
+        });
+
+        afterEach(function(){
+          fs.writeFile.restore();
+        });
+      });
+    });
+
+    describe("settings", function(){
+      let result;
+
+      beforeEach(co.wrap(function*(){
+        sinon.stub(fs, 'readFile')
+          .returns(Promise.resolve(JSON.stringify({name:'test'})));
+
+        because: {
+          result = yield instance.settings;
+        }
+      }));
+
+      afterEach(function(){
+        fs.readFile.restore();
+      });
+
+      it("should read the correct file", function(){
+        fs.readFile.should.have.been.calledWith('config/spirits/test/settings.json');
+      });
+
+      it("should return json", function(){
+        result.should.deep.equal({name:'test'});
+      });
+
+      describe("mutate", function(){
+        beforeEach(co.wrap(function*(){
+          sinon.stub(fs, 'writeFile')
+            .returns(Promise.resolve());
+
+          because: {
+            result = yield instance.mutateSettings(settings => settings.name = 'hello');
+          }
+        }));
+
+        it("should read the correct file", function(){
+          fs.readFile.should.have.been.calledWith('config/spirits/test/settings.json');
+        });
+
+        it("should write the correct file and content", function(){
+          fs.writeFile.should.have.been.calledWith('config/spirits/test/settings.json', JSON.stringify({name: 'hello'}, null, '  '));
         });
 
         afterEach(function(){
