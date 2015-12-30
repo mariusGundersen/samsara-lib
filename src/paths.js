@@ -16,13 +16,13 @@ module.exports = {
   spirit(name){
     return path.join(CONFIG_SPIRITS, name);
   },
-  containerConfigJson(name){
+  spiritContainerConfigJson(name){
     return path.join(CONFIG_SPIRITS, name, CONTAINER_CONFIG_JSON);
   },
-  settingsJson(name){
+  spiritSettingsJson(name){
     return path.join(CONFIG_SPIRITS, name, SETTINGS_JSON);
   },
-  deployLock(name){
+  spiritDeployLock(name){
     return path.join(CONFIG_SPIRITS, name, DEPLOY_LOCK);
   },
   spiritLives(name){

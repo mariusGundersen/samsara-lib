@@ -29,6 +29,6 @@ module.exports = co.wrap(function *(name, image, tag){
 
   yield mkdirp(pathTo.spirit(name));
   yield mkdirp(pathTo.spiritLives(name));
-  yield fs.writeFile(pathTo.containerConfigJson(name), JSON.stringify(containerConfig, null, '  '));
-  yield fs.writeFile(pathTo.settingsJson(name), JSON.stringify(spiritSettings, null, '  '));
+  yield fs.writeFile(pathTo.spiritContainerConfigJson(name), JSON.stringify(containerConfig, null, '  '));
+  yield fs.writeFile(pathTo.spiritSettingsJson(name), JSON.stringify(spiritSettings, null, '  '));
 });

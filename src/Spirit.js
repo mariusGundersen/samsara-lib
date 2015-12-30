@@ -29,7 +29,7 @@ module.exports = class Spirit{
       : Spirit.STATUS_DEAD);
   }
   get containerConfig(){
-    return fs.readFile(pathTo.containerConfigJson(this.name))
+    return fs.readFile(pathTo.spiritContainerConfigJson(this.name))
     .then(result => JSON.parse(result));
   }
   mutateContainerConfig(mutator){
@@ -39,10 +39,10 @@ module.exports = class Spirit{
       return config;
     })
     .then(config => JSON.stringify(config, null, '  '))
-    .then(json => fs.writeFile(pathTo.containerConfigJson(this.name), json));
+    .then(json => fs.writeFile(pathTo.spiritContainerConfigJson(this.name), json));
   }
   get settings(){
-    return fs.readFile(pathTo.settingsJson(this.name))
+    return fs.readFile(pathTo.spiritSettingsJson(this.name))
     .then(result => JSON.parse(result));
   }
   mutateSettings(mutator){
@@ -52,10 +52,10 @@ module.exports = class Spirit{
       return settings;
     })
     .then(settings => JSON.stringify(settings, null, '  '))
-    .then(json => fs.writeFile(pathTo.settingsJson(this.name), json));
+    .then(json => fs.writeFile(pathTo.spiritSettingsJson(this.name), json));
   }
   get isDeploying(){
-    return fs.exists(pathTo.deployLock(this.name));
+    return fs.exists(pathTo.spiritDeployLock(this.name));
   }
   get lives(){
     return getSpiritLives(this.name, this.docker)
