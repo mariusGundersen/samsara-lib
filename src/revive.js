@@ -18,7 +18,7 @@ const revive = co.wrap(function* (spirit, life, docker, log){
   const currentLife = yield spirit.currentLife;
   const nextLife = spirit.life(life);
   const plan = createPlan.revive(spiritSettings);
-  log.start(life, plan, spiritSettings);
+  log.start(life, plan, null);
 
   try{
     yield deployLock.lock(spirit.name);
