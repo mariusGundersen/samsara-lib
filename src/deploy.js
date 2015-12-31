@@ -46,7 +46,7 @@ const deploy = co.wrap(function* (spirit, docker, log){
     log.message('Creating container');
     const containerToStart = yield docker.createContainer(dockerConfig);
     const containerToStop = yield getContainerToStop(currentLife);
-    log.message('Container created');
+    log.message(`Container ${containerToStart.id} created`);
 
     log.stage();
     if(spiritSettings.deploymentMethod === 'stop-before-start'){

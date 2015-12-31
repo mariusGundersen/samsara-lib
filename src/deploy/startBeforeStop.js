@@ -3,7 +3,7 @@ const co = require('co');
 module.exports = co.wrap(function *(containerToStart, containerToStop, log){
   log.message('Starting new container')
   yield containerToStart.start();
-  log.message('Container started');
+  log.message(`Container ${containerToStart.id} started`);
 
   log.stage();
   if(containerToStop && 'stop' in containerToStop){
@@ -12,7 +12,7 @@ module.exports = co.wrap(function *(containerToStart, containerToStop, log){
     log.message('Waited 5 seconds');
     log.message('Stopping previous container');
     yield containerToStop.stop();
-    log.message('Container stopped');
+    log.message(`Container ${containerToStop.id} stopped`);
   }else{
     log.message('No container to stop');
   }
