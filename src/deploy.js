@@ -9,7 +9,6 @@ const createContainerConfig = require('./deploy/createContainerConfig');
 const startBeforeStop = require('./deploy/startBeforeStop');
 const stopBeforeStart = require('./deploy/stopBeforeStart');
 const cleanupOldContainers = require('./deploy/cleanupOldContainers');
-const Spirit = require('./Spirit');
 
 module.exports = function(spirit, docker){
   const log = createLogger(spirit.name);
@@ -39,7 +38,10 @@ const deploy = co.wrap(function* (spirit, docker, log){
 
     log.stage();
     log.message('Creating config');
-    const dockerConfig = yield createContainerConfig(spirit.name, nextLife, containerConfig, name => new Spirit(name, docker));
+    const dockerConfig = yield createContainerConfig(spirit.name, nextLife, containerConfig, name => {
+      const Spirit = require('./Spirit');
+      return new Spirit(name, docker)
+    });
     log.message('Config created');
     log.message('Creating container');
     const containerToStart = yield docker.createContainer(dockerConfig);
