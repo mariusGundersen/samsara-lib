@@ -6,7 +6,7 @@ const sinon = require('sinon');
 const fs = require('fs-promise');
 const u = require('./util/unindent');
 
-describe.only("ContainerConfig", function() {
+describe("ContainerConfig", function() {
   it("should toString with the file contents", function(){
     const containerConfig = new ContainerConfig('test', u`
       test:
@@ -133,7 +133,7 @@ describe.only("ContainerConfig", function() {
     const containerConfig = new ContainerConfig('test', u`
       test:
         image: 'nginx:latest'
-        volumesFrom:
+        volumes_from:
           - 'service'
           - 'service:ro'
           - 'spirit(service)'
@@ -244,7 +244,7 @@ describe.only("ContainerConfig", function() {
         {container: '', spirit: 'service', readOnly: true}
       ];
 
-      basicConfig.config.volumesFrom.should.deep.equal([
+      basicConfig.config.volumes_from.should.deep.equal([
         'service',
         'service:ro',
         'spirit(service)',

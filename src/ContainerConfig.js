@@ -133,7 +133,7 @@ module.exports = class ContainerConfig{
       });
   }
   get volumesFrom(){
-    return (this.config.volumesFrom || [])
+    return (this.config.volumes_from || [])
       .map(volumeFrom => {
         const parts = volumeFrom.split(':');
         const match = /^spirit\(([a-zA-Z0-9_\.-]+)\)$/.exec(parts[0]);
@@ -153,7 +153,7 @@ module.exports = class ContainerConfig{
       });
   }
   set volumesFrom(value){
-    this.config.volumesFrom = value
+    this.config.volumes_from = value
       .map(volumeFrom => {
         if(volumeFrom.spirit){
           return `spirit(${volumeFrom.spirit})`+(volumeFrom.readOnly ? ':ro' : '');
