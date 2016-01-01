@@ -2,13 +2,13 @@
 
 const fs = require('fs-promise');
 const co = require('co');
-const yaml = require('js-yaml');
 const pathTo = require('./paths');
 const getSpiritLives = require('./getSpiritLives');
 const deploy = require('./deploy');
 const revive = require('./revive');
 const Life = require('./Life');
 const fileLogger = require('./deploy/fileLogger');
+const ContainerConfig = require('./ContainerConfig');
 
 module.exports = class Spirit{
   constructor(name, docker){
@@ -31,19 +31,7 @@ module.exports = class Spirit{
   }
   get containerConfig(){
     return fs.readFile(pathTo.spiritContainerConfig(this.name))
-    .then(result => yaml.safeLoad(result))
-    .then(config => config[this.name]);
-  }
-  mutateContainerConfig(mutator){
-    return this.containerConfig
-    .then(config => {
-      mutator(config);
-      return config;
-    })
-    .then(config => yaml.safeDump({
-      [this.name]:config
-    }))
-    .then(yaml => fs.writeFile(pathTo.spiritContainerConfig(this.name), yaml));
+    .then(result => new ContainerConfig(this.name, result));
   }
   get settings(){
     return fs.readFile(pathTo.spiritSettingsJson(this.name))

@@ -70,36 +70,6 @@ describe("the Spirit", function() {
       it("should read the correct file", function(){
         fs.readFile.should.have.been.calledWith('config/spirits/test/containerConfig.yml');
       });
-
-      it("should return yaml", function(){
-        result.should.deep.equal({image:'nginx:latest'});
-      });
-
-      describe("mutate", function(){
-        beforeEach(co.wrap(function*(){
-          sinon.stub(fs, 'writeFile')
-            .returns(Promise.resolve());
-
-          because: {
-            result = yield instance.mutateContainerConfig(config => config.image = 'mysql:latest');
-          }
-        }));
-
-        it("should read the correct file", function(){
-          fs.readFile.should.have.been.calledWith('config/spirits/test/containerConfig.yml');
-        });
-
-        it("should write the correct file and content", function(){
-          fs.writeFile.should.have.been.calledWith('config/spirits/test/containerConfig.yml', u`
-            test:
-              image: 'mysql:latest'
-            `);
-        });
-
-        afterEach(function(){
-          fs.writeFile.restore();
-        });
-      });
     });
 
     describe("settings", function(){
