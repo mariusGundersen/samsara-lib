@@ -273,4 +273,25 @@ describe("ContainerConfig", function() {
       fs.writeFile.should.have.been.calledWith('config/spirits/test/containerConfig.yml', "test:\n  image: 'nginx:latest'\n");
     }));
   });
+
+  describe("saving life", function(){
+    beforeEach(function(){
+      sinon.stub(fs, 'writeFile').returns(Promise.resolve());
+    });
+
+    afterEach(function(){
+      fs.writeFile.restore();
+    });
+
+    it("should write the contents of the config to the right file", co.wrap(function *(){
+      const containerConfig = new ContainerConfig('test', u`
+        test:
+          image: 'nginx:latest'
+      `);
+
+      yield containerConfig.saveLife('2');
+
+      fs.writeFile.should.have.been.calledWith('config/spirits/test/lives/2/containerConfig.yml', "test:\n  container_name: test_v2\n  image: 'nginx:latest'\n");
+    }));
+  });
 });

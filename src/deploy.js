@@ -26,7 +26,7 @@ const deploy = co.wrap(function* (spirit, docker, log){
 
   try{
     yield deployLock.lock(spirit.name);
-    log.start(nextLife, plan, Object.assign({container_name: spirit.name + '_v' + nextLife}, containerConfig));
+    log.start(nextLife, plan, containerConfig);
     log.message('Deploy lock gained');
   }catch(e){
     return;

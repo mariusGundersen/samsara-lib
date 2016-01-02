@@ -193,7 +193,10 @@ module.exports = class ContainerConfig{
     return fs.writeFile(pathTo.spiritContainerConfig(this._name), output);
   }
   saveLife(life){
-    const output = yaml.safeDump(this.yaml);
+    const config = Object.assign({container_name: this._name + '_v' + life}, this.config);
+    const output = yaml.safeDump({
+      [this._name]: config
+    });
     return fs.writeFile(pathTo.spiritLifeContainerConfig(this._name, life), output);
   }
   toString(){

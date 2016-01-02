@@ -112,6 +112,7 @@ describe("upgrade", function() {
     const writeLifeContainerConfigCall = yield this.writeFile.called(descartes.withArgs('config/spirits/test/lives/1/containerConfig.yml'));
     writeLifeContainerConfigCall.args[1].should.equal(u`
       test:
+        container_name: test_v1
         image: 'nginx:latest'
       `);
 
