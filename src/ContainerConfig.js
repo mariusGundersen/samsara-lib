@@ -6,6 +6,7 @@ const yaml = require('js-yaml');
 
 module.exports = class ContainerConfig{
   constructor(name, fileContent){
+    fileContent = fileContent ||  name+': {}\n';
     this._name = name;
     this._fileContent = fileContent;
     this.yaml = yaml.safeLoad(fileContent);
@@ -165,6 +166,10 @@ module.exports = class ContainerConfig{
   save(){
     const output = yaml.safeDump(this.yaml);
     return fs.writeFile(pathTo.spiritContainerConfig(this._name), output);
+  }
+  saveLife(life){
+    const output = yaml.safeDump(this.yaml);
+    return fs.writeFile(pathTo.spiritLifeContainerConfig(this._name, life), output);
   }
   toString(){
     return this._fileContent;
