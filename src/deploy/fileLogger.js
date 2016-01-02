@@ -17,9 +17,8 @@ module.exports = function(eventEmitter){
       plan = event.plan;
       const name = event.spirit;
       const life = event.life+'';
-      yield mkdirp(paths.life(name, life));
-      const config = JSON.stringify(event.config, null, '  ');
-      yield fs.writeFile(paths.spiritLifeConfig(name, life), config);
+      yield mkdirp(paths.spiritLife(name, life));
+      yield event.containerConfig.saveLife(life);
       const stream = fs.createWriteStream(paths.spiritLifeDeployLog(name, life));
       stream.write(pad('deploy')+'\n');
       setLogStream(stream);

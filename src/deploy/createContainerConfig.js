@@ -1,91 +1,80 @@
-const extend = require('extend');
 const co = require('co');
 
-module.exports = co.wrap(function*(name, life, config, getSpirit){
-  const links = yield makeLinks(getSpirit, config.links);
-  const volumes = yield makeVolumesFrom(getSpirit, config.volumesFrom);
+module.exports = co.wrap(function*(name, life, containerConfig, getSpirit){
+  const links = yield makeLinks(getSpirit, containerConfig.links);
+  const volumesFrom = yield makeVolumesFrom(getSpirit, containerConfig.volumesFrom);
 
-  return extend({
-    Image: config.image+':'+config.tag,
+  return {
+    Image: containerConfig.image+':'+containerConfig.tag,
     name: name + '_v' + life,
-    Env: makeEnv(config.env),
-    Volumes: makeVolumes(config.volumes),
-    Labels: makeLabels(config.name, life),
+    Env: makeEnv(containerConfig.environment),
+    Volumes: makeVolumes(containerConfig.volumes),
+    Labels: makeLabels(name, life),
     HostConfig: {
       Links: links,
-      Binds: makeBinds(config.volumes),
-      PortBindings: makePortBindings(config.ports),
-      VolumesFrom: volumes
+      Binds: makeBinds(containerConfig.config),
+      PortBindings: makePortBindings(containerConfig.ports),
+      VolumesFrom: volumesFrom
     }
-  }, config.raw);
+  };
 });
 
-function makeEnv(env){
-  return Object.keys(env || {})
-  .map(function(name){
-    return name+'='+env[name];
-  });
+function makeEnv(environment){
+  return environment
+    .map(function(env){
+      return env.key+'='+env.value;
+    });
 }
 
 function makeVolumes(volumes){
-  return Object.keys(volumes || {})
-  .reduce(function(result, containerPath){
-    result[containerPath] = {};
-    return result;
-  }, {});
+  return (volumes || [])
+    .reduce(function(result, volume){
+      result[volume.containerPath] = {};
+      return result;
+    }, {});
 }
 
-function makeBinds(volumes){
-  return Object.keys(volumes || {})
-  .map(function(containerPath){
-    const volume = volumes[containerPath];
-    if(typeof(volume) == 'string'){
-      return volume+':'+containerPath;
-    }else if(volume.hostPath == ''){
-      return containerPath;
-    }else if(volume.readOnly){
-      return volume.hostPath+':'+containerPath+':ro';
-    }else{
-      return volume.hostPath+':'+containerPath;
-    }
-  });
+function makeBinds(config){
+  return (config.volumes || []);
 }
 
 function makePortBindings(ports){
-  return Object.keys(ports || {})
-  .reduce(function(result, hostPort){
-    const port = ports[hostPort];
-    if(typeof(port) == 'string'){
-      result[port+'/tcp'] = [{"HostPort": hostPort}];
+  return (ports || [])
+  .reduce(function(result, port){
+    if(port.hostIp && port.hostPort){
+      result[port.containerPort+'/tcp'] = [{"HostPort": port.hostPort, "HostIp": port.hostIp}];
+    }else if(port.hostPort){
+      result[port.containerPort+'/tcp'] = [{"HostPort": port.hostPort}];
     }else{
-      result[port.containerPort+'/'+(port.protocol||'tcp')] = [{"HostPort": hostPort, "HostIp": port.hostIp || ''}];
+      result[port.containerPort+'/tcp'] = [];
     }
     return result;
   }, {});
 }
 
 function makeLinks(getSpirit, links){
-  return Promise.all(Object.keys(links || {})
-  .map(function(name){
-    const link = links[name];
-    if(typeof(link) == 'string'){
-      return link+':'+name;
-    }else if('spirit' in link){
+  return Promise.all((links || [])
+  .map(function(link){
+    if(link.spirit){
       return getCurrentLifeContainerId(getSpirit, link.spirit)
-        .then(id => id +':'+ name)
+        .then(id => id +':'+ link.alias)
         .catch(e => {throw new Error(`Could not link to ${link.spirit}. Theres no running versions of that spirit`)});
-    }else if('container' in link){
-      return link.container+':'+name;
+    }else{
+      return link.container+':'+link.alias;
     }
   }));
 }
 
-function makeVolumesFrom(getSpirit, spirits){
-  return Promise.all((spirits || [])
-  .map(function(spirit){
-    return getCurrentLifeContainerId(getSpirit, spirit.spirit)
-      .then(id => id+':'+(spirit.readOnly ? 'ro' : 'rw'))
-      .catch(e => {throw new Error(`Could not get volumes from ${spirit.spirit}. Theres no running versions of that spirit`)});
+function makeVolumesFrom(getSpirit, volumesFrom){
+  return Promise.all((volumesFrom || [])
+  .map(function(volumeFrom){
+    if(volumeFrom.spirit){
+      return getCurrentLifeContainerId(getSpirit, volumeFrom.spirit)
+        .then(id => id + (volumeFrom.readOnly ? ':ro' : ''))
+        .catch(e => {throw new Error(`Could not get volumes from ${volumeFrom.spirit}. Theres no running versions of that spirit`)});
+    }else{
+      return volumeFrom.container + (volumeFrom.readOnly ? ':ro' : '');
+    }
   }));
 }
 

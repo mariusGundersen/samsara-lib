@@ -19,13 +19,13 @@ describe("stopBeforeStart", function(){
     });
 
     it("should do things in the right order", co.wrap(function*(){
-      stopBeforeStart({stop: this.stopSpy}, {start: this.startSpy}, {message: this.logSpy, stage: this.stageSpy});
+      stopBeforeStart({stop: this.stopSpy, id: 'stopId'}, {start: this.startSpy, id: 'startId'}, {message: this.logSpy, stage: this.stageSpy});
 
       yield this.logSpy.called(descartes.withArgs('Stopping previous container'));
 
       yield this.stopSpy.called();
 
-      yield this.logSpy.called(descartes.withArgs('Container stopped'));
+      yield this.logSpy.called(descartes.withArgs('Container stopId stopped'));
 
       yield this.stageSpy.called();
 
@@ -33,12 +33,12 @@ describe("stopBeforeStart", function(){
 
       yield this.startSpy.called();
 
-      yield this.logSpy.called(descartes.withArgs('Container started'));
+      yield this.logSpy.called(descartes.withArgs('Container startId started'));
     }));
 
     describe("without a container to stop", function(){
       it("should not attempt to stop it", co.wrap(function*(){
-        stopBeforeStart(null, {start: this.startSpy}, {message: this.logSpy, stage: this.stageSpy});
+        stopBeforeStart(null, {start: this.startSpy, id: 'startId'}, {message: this.logSpy, stage: this.stageSpy});
 
         yield this.logSpy.called(descartes.withArgs('No container to stop'));
 
@@ -48,7 +48,7 @@ describe("stopBeforeStart", function(){
 
         yield this.startSpy.called();
 
-        yield this.logSpy.called(descartes.withArgs('Container started'));
+        yield this.logSpy.called(descartes.withArgs('Container startId started'));
       }));
 
       describe("and starting fails", function(){
@@ -94,13 +94,13 @@ describe("stopBeforeStart", function(){
 
     describe("and starting fails", function(){
       it("should attempt to restart the stop container", co.wrap(function*(){
-        const result = stopBeforeStart({stop: this.stopSpy, start: this.restartSpy}, {start: this.startSpy}, {message: this.logSpy, stage: this.stageSpy});
+        const result = stopBeforeStart({stop: this.stopSpy, start: this.restartSpy, id: 'stopId'}, {start: this.startSpy}, {message: this.logSpy, stage: this.stageSpy});
 
         yield this.logSpy.called(descartes.withArgs('Stopping previous container'));
 
         yield this.stopSpy.called();
 
-        yield this.logSpy.called(descartes.withArgs('Container stopped'));
+        yield this.logSpy.called(descartes.withArgs('Container stopId stopped'));
 
         yield this.stageSpy.called();
 
@@ -131,13 +131,13 @@ describe("stopBeforeStart", function(){
 
     describe("and restarting fails", function(){
       it("should attempt to restart the stop container", co.wrap(function*(){
-        const result = stopBeforeStart({stop: this.stopSpy, start: this.restartSpy}, {start: this.startSpy}, {message: this.logSpy, stage: this.stageSpy});
+        const result = stopBeforeStart({stop: this.stopSpy, start: this.restartSpy, id: 'stopId'}, {start: this.startSpy}, {message: this.logSpy, stage: this.stageSpy});
 
         yield this.logSpy.called(descartes.withArgs('Stopping previous container'));
 
         yield this.stopSpy.called();
 
-        yield this.logSpy.called(descartes.withArgs('Container stopped'));
+        yield this.logSpy.called(descartes.withArgs('Container stopId stopped'));
 
         yield this.stageSpy.called();
 

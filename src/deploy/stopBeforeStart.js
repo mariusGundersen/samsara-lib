@@ -4,7 +4,7 @@ module.exports = co.wrap(function *stopBeforeStart(containerToStop, containerToS
   if(containerToStop){
     log.message('Stopping previous container');
     yield containerToStop.stop();
-    log.message('Container stopped');
+    log.message(`Container ${containerToStop.id} stopped`);
   }else{
     log.message('No container to stop');
   }
@@ -14,7 +14,7 @@ module.exports = co.wrap(function *stopBeforeStart(containerToStop, containerToS
   try{
     log.message('Starting new container')
     yield containerToStart.start();
-    log.message('Container started');
+    log.message(`Container ${containerToStart.id} started`);
   }catch(e){
     log.message('Could not start new container');
     if(containerToStop){

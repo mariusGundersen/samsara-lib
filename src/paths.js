@@ -6,6 +6,8 @@ const CONFIG_SPIRITS = 'config/spirits';
 const LIVES = 'lives';
 const DEPLOY_LOCK = 'deploy.lock';
 const CONFIG_JSON = 'config.json';
+const CONTAINER_CONFIG_YML = 'containerConfig.yml';
+const SETTINGS_JSON = 'settings.json';
 const DEPLOY_LOG = 'deploy.log';
 
 module.exports = {
@@ -15,20 +17,29 @@ module.exports = {
   spirit(name){
     return path.join(CONFIG_SPIRITS, name);
   },
-  configJson(name){
+  spiritContainerConfigJson(name){
     return path.join(CONFIG_SPIRITS, name, CONFIG_JSON);
   },
-  deployLock(name){
+  spiritContainerConfig(name){
+    return path.join(CONFIG_SPIRITS, name, CONTAINER_CONFIG_YML);
+  },
+  spiritSettingsJson(name){
+    return path.join(CONFIG_SPIRITS, name, SETTINGS_JSON);
+  },
+  spiritDeployLock(name){
     return path.join(CONFIG_SPIRITS, name, DEPLOY_LOCK);
   },
   spiritLives(name){
     return path.join(CONFIG_SPIRITS, name, LIVES);
   },
-  life(name, life){
+  spiritLife(name, life){
     return path.join(CONFIG_SPIRITS, name, LIVES, life);
   },
-  spiritLifeConfig(name, life){
+  spiritLifeContainerConfigJson(name, life){
     return path.join(CONFIG_SPIRITS, name, LIVES, life, CONFIG_JSON);
+  },
+  spiritLifeContainerConfig(name, life){
+    return path.join(CONFIG_SPIRITS, name, LIVES, life, CONTAINER_CONFIG_YML);
   },
   spiritLifeDeployLog(name, life){
     return path.join(CONFIG_SPIRITS, name, LIVES, life, DEPLOY_LOG);

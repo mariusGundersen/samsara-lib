@@ -23,13 +23,13 @@ describe("startBeforeStop", function(){
     });
 
     it("should do things in the right order", co.wrap(function*(){
-      const result = startBeforeStop({start: this.startSpy}, {stop: this.stopSpy}, {message: this.logSpy, stage: this.stageSpy});
+      const result = startBeforeStop({start: this.startSpy, id: 'startId'}, {stop: this.stopSpy, id: 'stopId'}, {message: this.logSpy, stage: this.stageSpy});
 
       yield this.logSpy.called(descartes.withArgs('Starting new container'));
 
       yield this.startSpy.called();
 
-      yield this.logSpy.called(descartes.withArgs('Container started'));
+      yield this.logSpy.called(descartes.withArgs('Container startId started'));
 
       yield this.stageSpy.called();
 
@@ -43,7 +43,7 @@ describe("startBeforeStop", function(){
 
       yield this.stopSpy.called();
 
-      yield this.logSpy.called(descartes.withArgs('Container stopped'));
+      yield this.logSpy.called(descartes.withArgs('Container stopId stopped'));
     }));
   });
 
@@ -62,13 +62,13 @@ describe("startBeforeStop", function(){
     });
 
     it("should do things in the right order", co.wrap(function*(){
-      const result = startBeforeStop({start: this.startSpy}, null, {message: this.logSpy, stage: this.stageSpy});
+      const result = startBeforeStop({start: this.startSpy, id: 'startId'}, null, {message: this.logSpy, stage: this.stageSpy});
 
       yield this.logSpy.called(descartes.withArgs('Starting new container'));
 
       yield this.startSpy.called();
 
-      yield this.logSpy.called(descartes.withArgs('Container started'));
+      yield this.logSpy.called(descartes.withArgs('Container startId started'));
 
       yield this.stageSpy.called();
 

@@ -5,6 +5,7 @@ const getNonSpiritContainers = require('./src/getNonSpiritContainers');
 const getSpiritNames = require('./src/getSpiritNames');
 const Spirit = require('./src/Spirit');
 const createSpirit = require('./src/createSpirit');
+const upgrade = require('./src/upgrade');
 
 module.exports = function(options){
   options = options || {};
@@ -27,6 +28,9 @@ module.exports = function(options){
     },
     container(id){
       return docker.getContainer(id);
+    },
+    upgrade(){
+      return upgrade();
     }
   };
 };

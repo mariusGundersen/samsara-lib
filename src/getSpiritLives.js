@@ -13,12 +13,12 @@ module.exports = co.wrap(function*(name, docker){
       ]
     })
   });
-  
+
   yield mkdirp(pathTo.spiritLives(name));
-  
+
   const files = yield fs.readdir(pathTo.spiritLives(name));
-  const directories = yield files.filter(life => isDirectory(pathTo.life(name, life)));
-  
+  const directories = yield files.filter(life => isDirectory(pathTo.spiritLife(name, life)));
+
   return directories
     .concat(containers
       .map(container => container.Labels['samsara.spirit.life'])

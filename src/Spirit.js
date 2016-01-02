@@ -8,6 +8,7 @@ const deploy = require('./deploy');
 const revive = require('./revive');
 const Life = require('./Life');
 const fileLogger = require('./deploy/fileLogger');
+const ContainerConfig = require('./ContainerConfig');
 
 module.exports = class Spirit{
   constructor(name, docker){
@@ -28,21 +29,25 @@ module.exports = class Spirit{
       ? Spirit.STATUS_ALIVE
       : Spirit.STATUS_DEAD);
   }
-  get config(){
-    return fs.readFile(pathTo.configJson(this.name))
+  get containerConfig(){
+    return fs.readFile(pathTo.spiritContainerConfig(this.name))
+    .then(result => new ContainerConfig(this.name, result));
+  }
+  get settings(){
+    return fs.readFile(pathTo.spiritSettingsJson(this.name))
     .then(result => JSON.parse(result));
   }
-  mutateConfig(mutator){
-    return this.config
-    .then(config => {
-      mutator(config);
-      return config;
+  mutateSettings(mutator){
+    return this.settings
+    .then(settings => {
+      mutator(settings);
+      return settings;
     })
-    .then(config => JSON.stringify(config, null, '  '))
-    .then(json => fs.writeFile(pathTo.configJson(this.name), json));
+    .then(settings => JSON.stringify(settings, null, '  '))
+    .then(json => fs.writeFile(pathTo.spiritSettingsJson(this.name), json));
   }
   get isDeploying(){
-    return fs.exists(pathTo.deployLock(this.name));
+    return fs.exists(pathTo.spiritDeployLock(this.name));
   }
   get lives(){
     return getSpiritLives(this.name, this.docker)

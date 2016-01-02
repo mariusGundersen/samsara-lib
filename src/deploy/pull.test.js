@@ -27,7 +27,7 @@ describe("pull", function(){
     });
 
     it("pull the image", co.wrap(function*(){
-      const test = pull('test', 'latest', this.docker, this.logSpy);
+      const test = pull('test:latest', this.docker, this.logSpy);
 
       yield this.logSpy.called(withExactArgs('Pulling image test:latest'));
 
