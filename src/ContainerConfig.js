@@ -46,6 +46,11 @@ module.exports = class ContainerConfig{
     }
   }
   set environment(value){
+    if(!value || !value.length){
+      delete this.config.environment;
+      return;
+    }
+
     this.config.environment = value
       .map(env => env.key+'='+env.value);
   }
@@ -59,6 +64,11 @@ module.exports = class ContainerConfig{
       }));
   }
   set volumes(value){
+    if(!value || !value.length){
+      delete this.config.volumes;
+      return;
+    }
+
     this.config.volumes = value
       .map(volume => {
         if(volume.hostPath){
@@ -90,6 +100,11 @@ module.exports = class ContainerConfig{
       });
   }
   set ports(value){
+    if(!value || !value.length){
+      delete this.config.ports;
+      return;
+    }
+
     this.config.ports = value
       .map(port => {
         if(port.hostPort){
@@ -124,6 +139,11 @@ module.exports = class ContainerConfig{
       });
   }
   set links(value){
+    if(!value || !value.length){
+      delete this.config.links;
+      return;
+    }
+
     this.config.links = value
       .map(link => {
         if(link.spirit){
@@ -154,6 +174,11 @@ module.exports = class ContainerConfig{
       });
   }
   set volumesFrom(value){
+    if(!value || !value.length){
+      delete this.config.volumes_from;
+      return;
+    }
+
     this.config.volumes_from = value
       .map(volumeFrom => {
         if(volumeFrom.spirit){

@@ -79,11 +79,6 @@ describe("upgrade", function() {
     writeContainerConfigCall.args[1].should.equal(u`
       test:
         image: 'nginx:latest'
-        environment: []
-        volumes: []
-        ports: []
-        links: []
-        volumes_from: []
       `);
 
     this.readdir.resolves(['1']);
@@ -118,11 +113,6 @@ describe("upgrade", function() {
     writeLifeContainerConfigCall.args[1].should.equal(u`
       test:
         image: 'nginx:latest'
-        environment: []
-        volumes: []
-        ports: []
-        links: []
-        volumes_from: []
       `);
 
     yield result;
