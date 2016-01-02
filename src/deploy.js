@@ -34,7 +34,7 @@ const deploy = co.wrap(function* (spirit, docker, log){
 
   try{
     log.stage();
-    yield pull(containerConfig.image, docker, log.message);
+    yield pull(containerConfig.image+':'+containerConfig.tag, docker, log.message);
 
     log.stage();
     log.message('Creating config');
