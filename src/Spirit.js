@@ -54,22 +54,22 @@ module.exports = class Spirit{
     .then(lives => lives.map(life => this.life(life)));
   }
   get currentLife(){
-    return this.lives.then(co.wrap(function *(lives){
-      const tests = yield Promise.all(lives.map(life =>
-        life.status.then(status => ({
-          test: status == Life.STATUS_ALIVE,
-          value: life
-        }))
-      ));
-      const alives = tests
-       .filter(temp => temp.test)
-       .map(temp => temp.value);
-      if(alives.length > 0){
-        return alives[0];
-      }else{
+    return this.docker.listContainers({
+      filters: JSON.stringify({
+        label:[
+          "samsara.spirit.life",
+          "samsara.spirit.name="+this.name
+        ],
+        status: ['running']
+      })
+    }).then(containers => {
+      if(containers.length == 0){
         return null;
       }
-    }));
+
+      const container = containers[0];
+      return new Life(this.name, container.Labels['samsara.spirit.life'], this.docker);
+    });
   }
   get latestLife(){
     return this.lives.then(lives => lives[lives.length - 1]);
