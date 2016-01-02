@@ -11,7 +11,7 @@ describe("fileLogger", function(){
     fileLogger.should.be.a('Function');
   });
 
-  describe("when called", function(){
+  describe.skip("when called", function(){
     beforeEach(function(){
       const jar = this.jar = new descartes.Jar();
       this.clock = sinon.useFakeTimers();
