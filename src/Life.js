@@ -41,6 +41,9 @@ module.exports = class Life{
   get containerConfig(){
     return fs.readFile(pathTo.spiritLifeContainerConfig(this.name, this.life), 'utf8');
   }
+  get deployLog(){
+    return fs.readFile(pathTo.spiritLifeDeployLog(this.name, this.life), 'utf8');
+  }
   get container(){
     return this.docker.listContainers({
       all: true,
