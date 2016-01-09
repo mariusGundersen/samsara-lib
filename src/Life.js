@@ -4,11 +4,14 @@ const fs = require('fs-promise');
 const co = require('co');
 const pathTo = require('./paths');
 const getSpiritLives = require('./getSpiritLives');
+const stream = require('stream');
+const prettifyLogs = require('./util/prettifyLogs');
 
 module.exports = class Life{
   constructor(name, life, docker){
     this.name = name;
     this.life = life;
+    this._container = undefined;
     Object.defineProperty(this, 'docker', {value:docker});
   }
   get status(){
@@ -44,7 +47,22 @@ module.exports = class Life{
   get deployLog(){
     return fs.readFile(pathTo.spiritLifeDeployLog(this.name, this.life), 'utf8');
   }
+  containerLog(html, options){
+    return this.container
+      .then(container => container.logs(options))
+      .then(logs => logs.pipe(prettifyLogs({html: !!html})))
+      .catch(e => new stream.Readable({read: function(n){ this.push(null) }}));
+  }
+  get inspect(){
+    return this.container
+      .then(container => container.inspect())
+      .catch(e => null);
+  }
   get container(){
+    if(this._container !== undefined){
+      return Promise.resolve(this._container);
+    }
+
     return this.docker.listContainers({
       all: true,
       filters: JSON.stringify({
@@ -55,9 +73,9 @@ module.exports = class Life{
       })
     }).then(function(result){
       if(result.length){
-        return this.docker.getContainer(result[0].Id);
+        return this._container = this.docker.getContainer(result[0].Id);
       }else{
-        throw new Error(`Container for spirit ${this.name} (${this.life}) doesn't exist`);
+        return this._container = null;
       }
     }.bind(this));
   }

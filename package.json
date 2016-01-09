@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "ansi-to-html": "^0.3.0",
     "co": "^4.5.4",
     "dockerode": "^2.1.5",
     "dockerode-promise": "^0.1.0",
