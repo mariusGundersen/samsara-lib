@@ -38,7 +38,7 @@ module.exports = function(eventEmitter){
     if(typeof(event.message) == 'string'){
       stream.write(event.message + '\n');
     }else if(event.message.progress){
-      stream.write(event.message.id + ': ' + event.message.status + prettyProgress(event.message.progresseDetail) + '\n');
+      stream.write(event.message.id + ': ' + event.message.status + ' ' + prettyProgress(event.message.progressDetail) + '\n');
     }
   }));
 
