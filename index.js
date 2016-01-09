@@ -6,6 +6,7 @@ const getSpiritNames = require('./src/getSpiritNames');
 const Spirit = require('./src/Spirit');
 const createSpirit = require('./src/createSpirit');
 const upgrade = require('./src/upgrade');
+const prettifyLogs = require('./src/util/prettifyLogs')
 
 module.exports = function(options){
   options = options || {};
@@ -27,7 +28,9 @@ module.exports = function(options){
       return getNonSpiritContainers(docker);
     },
     container(id){
-      return docker.getContainer(id);
+      const container = docker.getContainer(id);
+      container.prettyLogs = (html, options) => container.logs(options).then(logs => logs.pipe(prettifyLogs({html:html})));
+      return container;
     },
     upgrade(){
       return upgrade();
