@@ -6,6 +6,7 @@ const pathTo = require('./paths');
 const getSpiritLives = require('./getSpiritLives');
 const stream = require('stream');
 const prettifyLogs = require('./util/prettifyLogs');
+const statusToState = require('./util/statusToState');
 
 module.exports = class Life{
   constructor(name, life, docker){
@@ -27,6 +28,20 @@ module.exports = class Life{
       containers.length > 0
       ? Life.STATUS_ALIVE
       : Life.STATUS_DEAD);
+  }
+  get state(){
+    return this.docker.listContainers({
+      filters: JSON.stringify({
+        all: true,
+        label:[
+          `samsara.spirit.life=${this.life}`,
+          `samsara.spirit.name=${this.name}`
+        ]
+      })
+    }).then(containers =>
+      containers.length == 0
+      ? statusToState.DEAD
+      : statusToState(containers[0].Status));
   }
   get uptime(){
     return this.docker.listContainers({

@@ -1,5 +1,6 @@
 'use strict'
 const co = require('co');
+const statusToState = require('./util/statusToState');
 
 module.exports = co.wrap(function*(docker){
   const containers = yield docker.listContainers({all: true});
@@ -12,7 +13,7 @@ module.exports = co.wrap(function*(docker){
         name: name,
         id: container.Id,
         image: container.Image,
-        state: container.Status.indexOf('Up')>=0 ? 'running' : 'stopped',
+        state: statusToState(container.Status),
         status: container.Status
       };
     })
