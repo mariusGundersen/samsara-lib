@@ -50,7 +50,7 @@ describe("getSpirits", function() {
     yield this.readdir.called(descartes.withArgs('config/spirits/Test/lives'));
     yield this.readdir.called(descartes.withArgs('config/spirits/website/lives'));
 
-    this.stat.resolves({isFile(){return false}});
+    this.stat.rejects(new Error());
     yield this.stat.called(descartes.withArgs('config/spirits/database/deploy.lock'));
     yield this.stat.called(descartes.withArgs('config/spirits/Test/deploy.lock'));
     yield this.stat.called(descartes.withArgs('config/spirits/website/deploy.lock'));
@@ -78,7 +78,7 @@ describe("getSpirits", function() {
     this.readdir.resolves([])
     yield this.readdir.called(descartes.withArgs('config/spirits/Test/lives'));
 
-    this.stat.resolves({isFile(){return false}});
+    this.stat.rejects(new Error());
     yield this.stat.called(descartes.withArgs('config/spirits/Test/deploy.lock'));
 
     const spirits = yield result;
@@ -114,7 +114,7 @@ describe("getSpirits", function() {
     yield this.stat.called(descartes.withArgs('config/spirits/Test/lives/1'));
     yield this.stat.called(descartes.withArgs('config/spirits/Test/lives/2'));
 
-    this.stat.resolves({isFile(){return false}});
+    this.stat.rejects(new Error());
     yield this.stat.called(descartes.withArgs('config/spirits/Test/deploy.lock'));
 
     const spirits = yield result;

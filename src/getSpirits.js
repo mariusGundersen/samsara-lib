@@ -23,7 +23,7 @@ module.exports = co.wrap(function*(docker){
   .map(co.wrap(function*(name){
     const lives = yield getLives(name, containers);
     const currentLife = getCurrentLife(lives);
-    const isDeploying = yield fs.stat(pathTo.spiritDeployLock(name)).then(stat => stat.isFile());
+    const isDeploying = yield fs.stat(pathTo.spiritDeployLock(name)).then(stat => stat.isFile(), e => false);
     if(isDeploying){
       currentLife.state = 'deploying';
     }
