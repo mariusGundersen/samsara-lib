@@ -2,7 +2,7 @@
 const Docker = require('dockerode-promise');
 
 const getNonSpiritContainers = require('./src/getNonSpiritContainers');
-const getSpiritNames = require('./src/getSpiritNames');
+const getSpirits = require('./src/getSpirits');
 const Spirit = require('./src/Spirit');
 const createSpirit = require('./src/createSpirit');
 const upgrade = require('./src/upgrade');
@@ -15,8 +15,7 @@ module.exports = function(options){
 
   return {
     spirits(){
-      return getSpiritNames(docker)
-        .then(names => names.map(name => new Spirit(name, docker)));
+      return getSpirits(docker);
     },
     spirit(name){
       return new Spirit(name, docker);
