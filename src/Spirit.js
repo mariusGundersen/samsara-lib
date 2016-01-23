@@ -84,5 +84,5 @@ export default class Spirit{
   }
 };
 
-module.exports.STATUS_ALIVE = 'running';
-module.exports.STATUS_DEAD = 'stopped';
+Spirit.STATUS_ALIVE = 'running';
+Spirit.STATUS_DEAD = 'stopped';

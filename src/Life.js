@@ -93,5 +93,5 @@ export default class Life{
   }
 };
 
-module.exports.STATUS_ALIVE = 'running';
-module.exports.STATUS_DEAD = 'stopped';
+Life.STATUS_ALIVE = 'running';
+Life.STATUS_DEAD = 'stopped';
