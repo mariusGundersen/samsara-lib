@@ -28,6 +28,17 @@ describe("upgrade", function() {
   it("should work", async function(){
     const result = upgrade();
 
+    this.stat.resolves(isFile(false));
+    await this.stat.called(withExactArgs('config/authentication'));
+
+    this.readFile.rejects(new Error('file does not exist'));
+    await this.readFile.called(withExactArgs('config/authentication', 'utf8'));
+
+    await this.writeFile.called(withArgs('config/authentication')).then(call => {
+      const entry = call.args[1].split('\n')[0].split(':');
+      entry[0].should.equal('admin');
+    });
+
     this.readdir.resolves(['test', 'file.json']);
     await this.readdir.called(withExactArgs('config/spirits'));
 
@@ -61,23 +72,25 @@ describe("upgrade", function() {
     }, null, '  '));
     await this.readFile.called(withArgs('config/spirits/test/config.json'));
 
-    const writeSettingsCall = await this.writeFile.called(withArgs('config/spirits/test/settings.json'));
-    writeSettingsCall.args[1].should.equal(JSON.stringify({
-      name: 'test',
-      deploymentMethod: 'start-before-stop',
-      cleanupLimit: 0,
-      description: 'test',
-      url: 'https://test.mariusgundersen.net',
-      webhook: {
-        enable: false
-      }
-    }, null, '  '));
+    await this.writeFile.called(withArgs('config/spirits/test/settings.json')).then(call => {
+      call.args[1].should.equal(JSON.stringify({
+        name: 'test',
+        deploymentMethod: 'start-before-stop',
+        cleanupLimit: 0,
+        description: 'test',
+        url: 'https://test.mariusgundersen.net',
+        webhook: {
+          enable: false
+        }
+      }, null, '  '));
+    });
 
-    const writeContainerConfigCall = await this.writeFile.called(withArgs('config/spirits/test/containerConfig.yml'));
-    writeContainerConfigCall.args[1].should.equal(u`
-      test:
-        image: 'nginx:latest'
-      `);
+    await this.writeFile.called(withArgs('config/spirits/test/containerConfig.yml')).then(call => {
+      call.args[1].should.equal(u`
+        test:
+          image: 'nginx:latest'
+        `);
+    });
 
     this.readdir.resolves(['1']);
     await this.readdir.called(withArgs('config/spirits/test/lives'));
@@ -107,12 +120,13 @@ describe("upgrade", function() {
     }, null, '  '));
     await this.readFile.called(withArgs('config/spirits/test/lives/1/config.json'));
 
-    const writeLifeContainerConfigCall = await this.writeFile.called(withArgs('config/spirits/test/lives/1/containerConfig.yml'));
-    writeLifeContainerConfigCall.args[1].should.equal(u`
-      test:
-        container_name: test_v1
-        image: 'nginx:latest'
-      `);
+    await this.writeFile.called(withArgs('config/spirits/test/lives/1/containerConfig.yml')).then(call => {
+      call.args[1].should.equal(u`
+        test:
+          container_name: test_v1
+          image: 'nginx:latest'
+        `);
+    });
 
     await result;
     this.jar.done();
