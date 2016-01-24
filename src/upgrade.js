@@ -1,13 +1,33 @@
 import fs from 'fs-promise';
 import mkdirp from 'mkdirp-promise';
 import ContainerConfig from './ContainerConfig';
-import {spirits as spiritsDir, spirit, spiritSettingsJson, spiritContainerConfig, spiritContainerConfigJson, spiritLives, spiritLife, spiritLifeContainerConfig, spiritLifeContainerConfigJson} from './paths';
+import {addUser} from './users';
+import {
+  authentication as authenticationFile,
+  spirits as spiritsDir,
+  spirit, spiritSettingsJson,
+  spiritContainerConfig,
+  spiritContainerConfigJson,
+  spiritLives,
+  spiritLife,
+  spiritLifeContainerConfig,
+  spiritLifeContainerConfigJson
+} from './paths';
 
 export default async function(){
   //init
   await mkdirp(spiritsDir());
 
+  //ensure authentication file exists
+  if(!await isFile(authenticationFile())){
+    await addUser('admin', 'admin');
+  }
+
   //upgrade from json to yaml
+  await upgradeFromJsonToYaml();
+};
+
+async function upgradeFromJsonToYaml(){
   const files = await fs.readdir(spiritsDir());
   const spirits = await filterAsync(files, name => isDirectory(spirit(name)));
   await Promise.all(spirits.map(async function(spirit){
@@ -42,7 +62,7 @@ export default async function(){
       }
     }));
   }));
-};
+}
 
 function isDirectory(path){
   return fs.stat(path).then(stat => stat.isDirectory(), e => false);

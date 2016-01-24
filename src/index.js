@@ -4,6 +4,7 @@ import getSpirits from './getSpirits';
 import Spirit from './Spirit';
 import createSpirit from './createSpirit';
 import upgrade from './upgrade';
+import {users} from './users';
 import prettifyLogs from './util/prettifyLogs';
 
 export default function samsara(options){
@@ -31,6 +32,9 @@ export default function samsara(options){
     },
     upgrade(){
       return upgrade();
+    },
+    users(){
+      return users();
     }
   };
 };

@@ -1,5 +1,6 @@
 import path from 'path';
 
+const AUTHENTICATION = 'config/authentication';
 const CONFIG_SPIRITS = 'config/spirits';
 const LIVES = 'lives';
 const DEPLOY_LOCK = 'deploy.lock';
@@ -8,6 +9,9 @@ const CONTAINER_CONFIG_YML = 'containerConfig.yml';
 const SETTINGS_JSON = 'settings.json';
 const DEPLOY_LOG = 'deploy.log';
 
+export function authentication(){
+  return AUTHENTICATION;
+}
 export function spirits(){
   return CONFIG_SPIRITS;
 };
