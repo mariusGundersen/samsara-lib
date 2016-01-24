@@ -1,10 +1,8 @@
-'use strict'
+import fs from 'fs-promise';
+import {spiritContainerConfig, spiritLifeContainerConfig} from './paths';
+import yaml from 'js-yaml';
 
-const fs = require('fs-promise');
-const pathTo = require('./paths');
-const yaml = require('js-yaml');
-
-module.exports = class ContainerConfig{
+export default class ContainerConfig{
   constructor(name, fileContent){
     fileContent = fileContent ||  name+': {}\n';
     this._name = name;
@@ -190,14 +188,14 @@ module.exports = class ContainerConfig{
   }
   save(){
     const output = yaml.safeDump(this.yaml);
-    return fs.writeFile(pathTo.spiritContainerConfig(this._name), output);
+    return fs.writeFile(spiritContainerConfig(this._name), output);
   }
   saveLife(life){
     const config = Object.assign({container_name: this._name + '_v' + life}, this.config);
     const output = yaml.safeDump({
       [this._name]: config
     });
-    return fs.writeFile(pathTo.spiritLifeContainerConfig(this._name, life), output);
+    return fs.writeFile(spiritLifeContainerConfig(this._name, life), output);
   }
   toString(){
     return this._fileContent;

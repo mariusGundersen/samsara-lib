@@ -1,6 +1,6 @@
-const events = require('events');
+import events from 'events';
 
-module.exports = function createLogger(name){
+export default function createLogger(name){
   const eventEmitter = new events.EventEmitter();
   return {
     eventEmitter: eventEmitter,

@@ -1,9 +1,7 @@
-'use strict'
-const Spirit = require('./Spirit');
-const fs = require('fs-promise');
-const co = require('co');
-const sinon = require("sinon");
-const u = require('./util/unindent');
+import Spirit from './Spirit';
+import fs from 'fs-promise';
+import sinon from 'sinon';
+import u from './util/unindent';
 
 describe("the Spirit", function() {
 
@@ -51,7 +49,7 @@ describe("the Spirit", function() {
     describe("containerConfig", function(){
       let result;
 
-      beforeEach(co.wrap(function*(){
+      beforeEach(async function(){
         sinon.stub(fs, 'readFile')
           .returns(Promise.resolve(u`
             test:
@@ -59,9 +57,9 @@ describe("the Spirit", function() {
             `));
 
         because: {
-          result = yield instance.containerConfig;
+          result = await instance.containerConfig;
         }
-      }));
+      });
 
       afterEach(function(){
         fs.readFile.restore();
@@ -75,14 +73,14 @@ describe("the Spirit", function() {
     describe("settings", function(){
       let result;
 
-      beforeEach(co.wrap(function*(){
+      beforeEach(async function(){
         sinon.stub(fs, 'readFile')
           .returns(Promise.resolve(JSON.stringify({name:'test'})));
 
         because: {
-          result = yield instance.settings;
+          result = await instance.settings;
         }
-      }));
+      });
 
       afterEach(function(){
         fs.readFile.restore();
@@ -97,14 +95,14 @@ describe("the Spirit", function() {
       });
 
       describe("mutate", function(){
-        beforeEach(co.wrap(function*(){
+        beforeEach(async function(){
           sinon.stub(fs, 'writeFile')
             .returns(Promise.resolve());
 
           because: {
-            result = yield instance.mutateSettings(settings => settings.name = 'hello');
+            result = await instance.mutateSettings(settings => settings.name = 'hello');
           }
-        }));
+        });
 
         it("should read the correct file", function(){
           fs.readFile.should.have.been.calledWith('config/spirits/test/settings.json');
@@ -123,14 +121,14 @@ describe("the Spirit", function() {
     describe("status stopped", function(){
       let result;
 
-      beforeEach(co.wrap(function*(){
+      beforeEach(async function(){
         docker.listContainers
           .returns(Promise.resolve([]));
 
         because: {
-          result = yield instance.status;
+          result = await instance.status;
         }
-      }));
+      });
 
       it("should filter correctly", function(){
         docker.listContainers.should.have.been.calledWith({
@@ -146,14 +144,14 @@ describe("the Spirit", function() {
     describe("status running", function(){
       let result;
 
-      beforeEach(co.wrap(function*(){
+      beforeEach(async function(){
         docker.listContainers
           .returns(Promise.resolve([{}]));
 
         because: {
-          result = yield instance.status;
+          result = await instance.status;
         }
-      }));
+      });
 
       it("should filter correctly", function(){
         docker.listContainers.should.have.been.calledWith({

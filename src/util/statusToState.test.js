@@ -1,4 +1,4 @@
-const statusToState = require('./statusToState');
+import statusToState from './statusToState';
 
 describe("statusToState", function(){
   it("Up", function(){

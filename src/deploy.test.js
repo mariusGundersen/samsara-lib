@@ -1,4 +1,4 @@
-const deploy = require('../src/deploy');
+import deploy from './deploy';
 
 describe('deploy', function(){
   it('should deploy', function(){

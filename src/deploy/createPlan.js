@@ -1,38 +1,27 @@
-module.exports = {
-  deploy(spiritSettings){
-    return spread(function*(){
-      yield 'pull';
-      yield 'create';
-      if(spiritSettings.deploymentMethod === 'stop-before-start'){
-        yield 'stop';
-        yield 'start';
-      }else{
-        yield 'start';
-        yield 'stop';
-      }
-      if(spiritSettings.cleanupLimit > 0){
-        yield 'cleanup';
-      }
-    });
-  },
-  revive(spiritSettings){
-    return spread(function*(){
-      if(spiritSettings.deploymentMethod === 'stop-before-start'){
-        yield 'stop';
-        yield 'start';
-      }else{
-        yield 'start';
-        yield 'stop';
-      }
-    });
-  }
+export function deploy(spiritSettings){
+  return [...(function*(){
+    yield 'pull';
+    yield 'create';
+    if(spiritSettings.deploymentMethod === 'stop-before-start'){
+      yield 'stop';
+      yield 'start';
+    }else{
+      yield 'start';
+      yield 'stop';
+    }
+    if(spiritSettings.cleanupLimit > 0){
+      yield 'cleanup';
+    }
+  })()];
 };
-
-function spread(iterator){
-  'use strict'
-  const result = [];
-  for(let item of iterator()){
-    result.push(item);
-  }
-  return result;
-}
+export function revive(spiritSettings){
+  return [...(function*(){
+    if(spiritSettings.deploymentMethod === 'stop-before-start'){
+      yield 'stop';
+      yield 'start';
+    }else{
+      yield 'start';
+      yield 'stop';
+    }
+  })()];
+};

@@ -1,5 +1,6 @@
-test
-.gitignore
+/test/
+/src/
+.*
 *.test.js
-config
-.vscode
+/config/
+/.vscode/

@@ -1,8 +1,6 @@
-const co = require('co');
-
-module.exports = co.wrap(function*(name, life, containerConfig, getSpirit){
-  const links = yield makeLinks(getSpirit, containerConfig.links);
-  const volumesFrom = yield makeVolumesFrom(getSpirit, containerConfig.volumesFrom);
+export default async function(name, life, containerConfig, getSpirit){
+  const links = await makeLinks(getSpirit, containerConfig.links);
+  const volumesFrom = await makeVolumesFrom(getSpirit, containerConfig.volumesFrom);
 
   return {
     Image: containerConfig.image+':'+containerConfig.tag,
@@ -17,7 +15,7 @@ module.exports = co.wrap(function*(name, life, containerConfig, getSpirit){
       VolumesFrom: volumesFrom
     }
   };
-});
+};
 
 function makeEnv(environment){
   return environment

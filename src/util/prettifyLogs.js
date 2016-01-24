@@ -1,8 +1,7 @@
-'use strict'
-const stream = require('stream');
-const Convert = require('ansi-to-html');
+import stream from 'stream';
+import Convert from 'ansi-to-html';
 
-module.exports = function prettifyLogs(options) {
+export default function prettifyLogs(options) {
   let header = null;
 
   const stdOutConvert = createStdOutConverter(options);

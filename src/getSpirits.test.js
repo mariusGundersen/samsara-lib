@@ -1,15 +1,12 @@
-'use strict'
-const getSpirits = require('./getSpirits');
-const fs = require('fs-promise');
-const co = require('co');
-const sinon = require("sinon");
-const descartes = require('descartes');
-const expect = chai.expect;
+import getSpirits from './getSpirits';
+import fs from 'fs-promise';
+import sinon from 'sinon';
+import {Jar, withArgs, withExactArgs} from 'descartes';
 
 describe("getSpirits", function() {
 
-  beforeEach(co.wrap(function*(){
-    this.jar = new descartes.Jar();
+  beforeEach(async function(){
+    this.jar = new Jar();
     this.readdir = this.jar.probe('fs.readdir');
     this.stat = this.jar.probe('fs.stat');
     this.listContainers = this.jar.probe('docker.listContainers');
@@ -21,103 +18,103 @@ describe("getSpirits", function() {
     this.docker = {
       listContainers: this.listContainers
     };
-  }));
+  });
 
   afterEach(function(){
     fs.readdir.restore();
     fs.stat.restore();
   });
 
-  it("should return the spirits", co.wrap(function*(){
+  it("should return the spirits", async function(){
     const result = getSpirits(this.docker);
 
     this.listContainers.resolves([]);
-    yield this.listContainers.called().then(call => {
+    await this.listContainers.called().then(call => {
       call.args[0].all.should.equal(true);
       call.args[0].filters.should.equal('{"label":["samsara.spirit.life","samsara.spirit.name"]}');
     });
 
     this.readdir.resolves(['Test', 'website', 'database'])
-    yield this.readdir.called(descartes.withArgs('config/spirits'));
+    await this.readdir.called(withArgs('config/spirits'));
 
     this.stat.resolves({isDirectory(){return true}});
-    yield this.stat.called(descartes.withArgs('config/spirits/Test'));
-    yield this.stat.called(descartes.withArgs('config/spirits/website'));
-    yield this.stat.called(descartes.withArgs('config/spirits/database'));
+    await this.stat.called(withArgs('config/spirits/Test'));
+    await this.stat.called(withArgs('config/spirits/website'));
+    await this.stat.called(withArgs('config/spirits/database'));
 
     this.readdir.resolves([])
-    yield this.readdir.called(descartes.withArgs('config/spirits/database/lives'));
-    yield this.readdir.called(descartes.withArgs('config/spirits/Test/lives'));
-    yield this.readdir.called(descartes.withArgs('config/spirits/website/lives'));
+    await this.readdir.called(withArgs('config/spirits/database/lives'));
+    await this.readdir.called(withArgs('config/spirits/Test/lives'));
+    await this.readdir.called(withArgs('config/spirits/website/lives'));
 
     this.stat.rejects(new Error());
-    yield this.stat.called(descartes.withArgs('config/spirits/database/deploy.lock'));
-    yield this.stat.called(descartes.withArgs('config/spirits/Test/deploy.lock'));
-    yield this.stat.called(descartes.withArgs('config/spirits/website/deploy.lock'));
+    await this.stat.called(withArgs('config/spirits/database/deploy.lock'));
+    await this.stat.called(withArgs('config/spirits/Test/deploy.lock'));
+    await this.stat.called(withArgs('config/spirits/website/deploy.lock'));
 
-    const spirits = yield result;
+    const spirits = await result;
     spirits.map(x => x.name).should.eql(['database', 'Test', 'website']);
     this.jar.done();
-  }));
+  });
 
-  it("should work when a spirit has no lives", co.wrap(function*(){
+  it("should work when a spirit has no lives", async function(){
     const result = getSpirits(this.docker);
 
     this.listContainers.resolves([]);
-    yield this.listContainers.called().then(call => {
+    await this.listContainers.called().then(call => {
       call.args[0].all.should.equal(true);
       call.args[0].filters.should.equal('{"label":["samsara.spirit.life","samsara.spirit.name"]}');
     });
 
     this.readdir.resolves(['Test'])
-    yield this.readdir.called(descartes.withArgs('config/spirits'));
+    await this.readdir.called(withArgs('config/spirits'));
 
     this.stat.resolves({isDirectory(){return true}});
-    yield this.stat.called(descartes.withArgs('config/spirits/Test'));
+    await this.stat.called(withArgs('config/spirits/Test'));
 
     this.readdir.resolves([])
-    yield this.readdir.called(descartes.withArgs('config/spirits/Test/lives'));
+    await this.readdir.called(withArgs('config/spirits/Test/lives'));
 
     this.stat.rejects(new Error());
-    yield this.stat.called(descartes.withArgs('config/spirits/Test/deploy.lock'));
+    await this.stat.called(withArgs('config/spirits/Test/deploy.lock'));
 
-    const spirits = yield result;
+    const spirits = await result;
     spirits.map(x => x.name).should.eql(['Test']);
     spirits[0].lives.should.eql([]);
     spirits[0].state.should.equal('dead');
     spirits[0].life.should.equal('?');
     this.jar.done();
-  }));
+  });
 
-  it("should work when a spirit has lives", co.wrap(function*(){
+  it("should work when a spirit has lives", async function(){
     const result = getSpirits(this.docker);
 
     this.listContainers.resolves([
       createContainer('Test', 2, 'Exited (1) 2 minutes ago'),
       createContainer('Test', 3, 'Up 2 minutes')
     ]);
-    yield this.listContainers.called().then(call => {
+    await this.listContainers.called().then(call => {
       call.args[0].all.should.equal(true);
       call.args[0].filters.should.equal('{"label":["samsara.spirit.life","samsara.spirit.name"]}');
     });
 
     this.readdir.resolves(['Test'])
-    yield this.readdir.called(descartes.withArgs('config/spirits'));
+    await this.readdir.called(withArgs('config/spirits'));
 
     this.stat.resolves({isDirectory(){return true}});
-    yield this.stat.called(descartes.withArgs('config/spirits/Test'));
+    await this.stat.called(withArgs('config/spirits/Test'));
 
     this.readdir.resolves(['1','2'])
-    yield this.readdir.called(descartes.withArgs('config/spirits/Test/lives'));
+    await this.readdir.called(withArgs('config/spirits/Test/lives'));
 
     this.stat.resolves({isDirectory(){return true}});
-    yield this.stat.called(descartes.withArgs('config/spirits/Test/lives/1'));
-    yield this.stat.called(descartes.withArgs('config/spirits/Test/lives/2'));
+    await this.stat.called(withArgs('config/spirits/Test/lives/1'));
+    await this.stat.called(withArgs('config/spirits/Test/lives/2'));
 
     this.stat.rejects(new Error());
-    yield this.stat.called(descartes.withArgs('config/spirits/Test/deploy.lock'));
+    await this.stat.called(withArgs('config/spirits/Test/deploy.lock'));
 
-    const spirits = yield result;
+    const spirits = await result;
     spirits.map(x => x.name).should.eql(['Test']);
     spirits[0].state.should.equal('running');
     spirits[0].life.should.equal(3);
@@ -134,7 +131,7 @@ describe("getSpirits", function() {
     lives[2].uptime.should.equal('2 minutes');
 
     this.jar.done();
-  }));
+  });
 });
 
 function createContainer(name, life, status){

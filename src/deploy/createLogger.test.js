@@ -1,4 +1,4 @@
-const createLogger = require('./createLogger');
+import createLogger from './createLogger';
 
 describe('createLogger', function(){
   it('should be a function', function(){

@@ -1,11 +1,10 @@
-const fs = require('fs-promise');
-const co = require('co');
-const pathTo = require('./paths');
-const statusToState = require('./util/statusToState');
-const asyncArray = require('./util/asyncArray');
+import fs from 'fs-promise';
+import {spirits, spirit, spiritDeployLock, spiritLives, spiritLife} from './paths';
+import statusToState, {RUNNING, DEAD} from './util/statusToState';
+import {filter} from './util/asyncArray';
 
-module.exports = co.wrap(function*(docker){
-  const containers = yield docker.listContainers({
+export default async function(docker){
+  const containers = await docker.listContainers({
     all: true,
     filters: JSON.stringify({
       "label":[
@@ -15,15 +14,15 @@ module.exports = co.wrap(function*(docker){
     })
   });
 
-  const directories = yield fs.readdir(pathTo.spirits())
-    .then(asyncArray.filter(name => isDirectory(pathTo.spirit(name))));
+  const directories = await fs.readdir(spirits())
+    .then(filter(name => isDirectory(spirit(name))));
 
-  return yield Promise.all(directories
+  return await Promise.all(directories
   .sort((a,b) => a.toLowerCase().localeCompare(b.toLowerCase()))
-  .map(co.wrap(function*(name){
-    const lives = yield getLives(name, containers);
+  .map(async function(name){
+    const lives = await getLives(name, containers);
     const currentLife = getCurrentLife(lives);
-    const isDeploying = yield fs.stat(pathTo.spiritDeployLock(name)).then(stat => stat.isFile(), e => false);
+    const isDeploying = await fs.stat(spiritDeployLock(name)).then(stat => stat.isFile(), e => false);
     if(isDeploying){
       currentLife.state = 'deploying';
     }
@@ -33,12 +32,12 @@ module.exports = co.wrap(function*(docker){
       state: currentLife.state,
       life: currentLife.life
     };
-  })));
-});
+  }));
+};
 
-const getLives = co.wrap(function *(name, containers){
-  const directories = yield fs.readdir(pathTo.spiritLives(name))
-  .then(asyncArray.filter(life => isDirectory(pathTo.spiritLife(name, life))));
+async function getLives(name, containers){
+  const directories = await fs.readdir(spiritLives(name))
+  .then(filter(life => isDirectory(spiritLife(name, life))));
 
   const lives = containers
     .filter(container => container.Labels['samsara.spirit.name'] == name)
@@ -54,16 +53,16 @@ const getLives = co.wrap(function *(name, containers){
       .filter(directory => lives.map(life => life.life*1).indexOf(directory*1) === -1)
       .map(directory => ({
         life: directory*1,
-        state: statusToState.DEAD,
+        state: DEAD,
         uptime: ''
       }))
     ).sort((a,b) => a.life - b.life);
-});
+};
 
 function getCurrentLife(lives){
-  return lives.filter(life => life.state === statusToState.RUNNING).reverse()[0]
+  return lives.filter(life => life.state === RUNNING).reverse()[0]
     || lives.map(x => x).reverse()[0]
-    || {life: '?', state: statusToState.DEAD, uptime: ''};
+    || {life: '?', state: DEAD, uptime: ''};
 }
 
 function isDirectory(path){

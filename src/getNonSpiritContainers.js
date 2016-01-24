@@ -1,9 +1,7 @@
-'use strict'
-const co = require('co');
-const statusToState = require('./util/statusToState');
+import statusToState from './util/statusToState';
 
-module.exports = co.wrap(function*(docker){
-  const containers = yield docker.listContainers({all: true});
+export default async function(docker){
+  const containers = await docker.listContainers({all: true});
 
   return containers
     .filter(noSamsaraLabels)
@@ -18,7 +16,7 @@ module.exports = co.wrap(function*(docker){
       };
     })
     .sort((a,b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
-});
+};
 
 function noSamsaraLabels(container){
   return Object.keys(container.Labels || {})

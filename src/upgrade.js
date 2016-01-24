@@ -1,51 +1,48 @@
-'use strict'
-const co = require('co');
-const fs = require('fs-promise');
-const mkdirp = require('mkdirp-promise');
+import fs from 'fs-promise';
+import mkdirp from 'mkdirp-promise';
+import ContainerConfig from './ContainerConfig';
+import {spirits as spiritsDir, spirit, spiritSettingsJson, spiritContainerConfig, spiritContainerConfigJson, spiritLives, spiritLife, spiritLifeContainerConfig, spiritLifeContainerConfigJson} from './paths';
 
-const ContainerConfig = require('./ContainerConfig');
-const pathTo = require('./paths');
-
-module.exports = co.wrap(function *(){
+export default async function(){
   //init
-  yield mkdirp(pathTo.spirits());
+  await mkdirp(spiritsDir());
 
   //upgrade from json to yaml
-  const files = yield fs.readdir(pathTo.spirits());
-  const spirits = yield filterAsync(files, name => isDirectory(pathTo.spirit(name)));
-  yield Promise.all(spirits.map(co.wrap(function *(spirit){
-    const settingsExists = yield isFile(pathTo.spiritSettingsJson(spirit));
-    const yamlExists = yield isFile(pathTo.spiritContainerConfig(spirit));
-    const jsonExists = yield isFile(pathTo.spiritContainerConfigJson(spirit));
+  const files = await fs.readdir(spiritsDir());
+  const spirits = await filterAsync(files, name => isDirectory(spirit(name)));
+  await Promise.all(spirits.map(async function(spirit){
+    const settingsExists = await isFile(spiritSettingsJson(spirit));
+    const yamlExists = await isFile(spiritContainerConfig(spirit));
+    const jsonExists = await isFile(spiritContainerConfigJson(spirit));
     if(jsonExists){
-      const json = yield fs.readFile(pathTo.spiritContainerConfigJson(spirit), 'utf8');
+      const json = await fs.readFile(spiritContainerConfigJson(spirit), 'utf8');
       const config = JSON.parse(json);
 
       if(!settingsExists){
         const settings = createSettings(spirit, config);
-        yield fs.writeFile(pathTo.spiritSettingsJson(spirit), JSON.stringify(settings, null, '  '));
+        await fs.writeFile(spiritSettingsJson(spirit), JSON.stringify(settings, null, '  '));
       }
 
       if(!yamlExists){
         console.log('writing yaml for ', spirit);
         const yamlConfig = createYamlConfig(spirit, config);
-        yield yamlConfig.save();
+        await yamlConfig.save();
       }
     }
-    const files = yield fs.readdir(pathTo.spiritLives(spirit));
-    const lives = yield filterAsync(files, life => isDirectory(pathTo.spiritLife(spirit, life)));
-    yield Promise.all(lives.map(co.wrap(function *(life){
-      const yamlExists = yield isFile(pathTo.spiritLifeContainerConfig(spirit, life));
-      const jsonExists = yield isFile(pathTo.spiritLifeContainerConfigJson(spirit, life));
+    const files = await fs.readdir(spiritLives(spirit));
+    const lives = await filterAsync(files, life => isDirectory(spiritLife(spirit, life)));
+    await Promise.all(lives.map(async function(life){
+      const yamlExists = await isFile(spiritLifeContainerConfig(spirit, life));
+      const jsonExists = await isFile(spiritLifeContainerConfigJson(spirit, life));
       if(!yamlExists && jsonExists){
-        const json = yield fs.readFile(pathTo.spiritLifeContainerConfigJson(spirit, life), 'utf8');
+        const json = await fs.readFile(spiritLifeContainerConfigJson(spirit, life), 'utf8');
         const config = JSON.parse(json);
         const yamlConfig = createYamlConfig(spirit, config);
-        yield yamlConfig.saveLife(life);
+        await yamlConfig.saveLife(life);
       }
-    })));
-  })));
-});
+    }));
+  }));
+};
 
 function isDirectory(path){
   return fs.stat(path).then(stat => stat.isDirectory(), e => false);
