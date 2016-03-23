@@ -161,8 +161,9 @@ describe("createContainerConfig", function(){
         image: 'nginx:latest'
         ports:
           - '80'
-          - '80:70'
-          - '127.0.0.1:90:8080'
+          - '80:70/tcp'
+          - '127.0.0.1:90:8080/udp'
+          - '127.0.0.1:90:8080/tcpudp'
     `), _ => _);
 
     result.should.deep.equal({
@@ -179,9 +180,10 @@ describe("createContainerConfig", function(){
         Binds: [],
         VolumesFrom: [],
         PortBindings: {
-          '80/tcp':[],
+          '80/tcpudp':[],
           '70/tcp':[{HostPort:'80'}],
-          '8080/tcp':[{HostPort:'90', HostIp:'127.0.0.1'}]
+          '8080/udp':[{HostPort:'90', HostIp:'127.0.0.1'}],
+          '8080/tcpudp':[{HostPort:'90', HostIp:'127.0.0.1'}]
         }
       }
     });

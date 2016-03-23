@@ -39,12 +39,13 @@ function makeBinds(config){
 function makePortBindings(ports){
   return (ports || [])
   .reduce(function(result, port){
+    const protocol = (port.tcp == false ? '' : 'tcp') + (port.udp == false ? '' : 'udp');
     if(port.hostIp && port.hostPort){
-      result[port.containerPort+'/tcp'] = [{"HostPort": port.hostPort, "HostIp": port.hostIp}];
+      result[port.containerPort+'/'+protocol] = [{"HostPort": port.hostPort, "HostIp": port.hostIp}];
     }else if(port.hostPort){
-      result[port.containerPort+'/tcp'] = [{"HostPort": port.hostPort}];
+      result[port.containerPort+'/'+protocol] = [{"HostPort": port.hostPort}];
     }else{
-      result[port.containerPort+'/tcp'] = [];
+      result[port.containerPort+'/'+protocol] = [];
     }
     return result;
   }, {});

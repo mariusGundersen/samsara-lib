@@ -98,12 +98,18 @@ describe("ContainerConfig", function() {
           - '80'
           - '8080:80'
           - '127.0.0.1:8080:80'
+          - '80/udp'
+          - '81/tcp'
+          - '82/tcpudp'
     `);
 
     containerConfig.ports.should.deep.equal([
-      {containerPort: '80', hostPort: '', hostIp: ''},
-      {containerPort: '80', hostPort: '8080', hostIp: ''},
-      {containerPort: '80', hostPort: '8080', hostIp: '127.0.0.1'}
+      {containerPort: '80', hostPort: '', hostIp: '', udp: true, tcp: true},
+      {containerPort: '80', hostPort: '8080', hostIp: '', udp: true, tcp: true},
+      {containerPort: '80', hostPort: '8080', hostIp: '127.0.0.1', udp: true, tcp: true},
+      {containerPort: '80', hostPort: '', hostIp: '', udp: true, tcp: false},
+      {containerPort: '81', hostPort: '', hostIp: '', udp: false, tcp: true},
+      {containerPort: '82', hostPort: '', hostIp: '', udp: true, tcp: true}
     ]);
   });
 
@@ -205,15 +211,15 @@ describe("ContainerConfig", function() {
 
     it("should set the ports", function(){
       basicConfig.ports = [
-        {containerPort: '80', hostPort: '', hostIp: ''},
-        {containerPort: '80', hostPort: '8080', hostIp: ''},
-        {containerPort: '80', hostPort: '8080', hostIp: '127.0.0.1'}
+        {containerPort: '80', hostPort: '', hostIp: '', udp: true, tcp: true},
+        {containerPort: '80', hostPort: '8080', hostIp: '', udp: true, tcp: false},
+        {containerPort: '80', hostPort: '8080', hostIp: '127.0.0.1', udp: false, tcp: true}
       ];
 
       basicConfig.config.ports.should.deep.equal([
-        '80',
-        '8080:80',
-        '127.0.0.1:8080:80'
+        '80/tcpudp',
+        '8080:80/udp',
+        '127.0.0.1:8080:80/tcp'
       ]);
     });
 

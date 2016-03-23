@@ -88,12 +88,17 @@ export default class ContainerConfig{
     return (this.config.ports || [])
       .map(port => {
         const parts = port.split(':');
+        const create = (containerPort, hostPort, hostIp) => {
+          const lastParts = containerPort.split('/');
+          const protocols = lastParts.length > 1 ? lastParts[1] : 'tcpudp';
+          return {containerPort: lastParts[0], hostPort: hostPort, hostIp: hostIp, udp: protocols.indexOf('udp') != -1, tcp: protocols.indexOf('tcp') != -1};
+        };
         if(parts.length == 1){
-          return {containerPort: parts[0], hostPort: '', hostIp: ''};
+          return create(parts[0], '', '');
         }else if(parts.length == 2){
-          return {containerPort: parts[1], hostPort: parts[0], hostIp: ''};
+          return create(parts[1], parts[0], '');
         }else if(parts.length == 3){
-          return {containerPort: parts[2], hostPort: parts[1], hostIp: parts[0]};
+          return create(parts[2], parts[1], parts[0]);
         }
       });
   }
@@ -105,14 +110,15 @@ export default class ContainerConfig{
 
     this.config.ports = value
       .map(port => {
+        const protocol = (port.tcp == false ? '' : 'tcp') + (port.udp == false ? '' : 'udp');
         if(port.hostPort){
           if(port.hostIp){
-            return port.hostIp+':'+port.hostPort+':'+port.containerPort;
+            return port.hostIp+':'+port.hostPort+':'+port.containerPort+'/'+protocol;
           }else{
-            return port.hostPort+':'+port.containerPort;
+            return port.hostPort+':'+port.containerPort+'/'+protocol;
           }
         }else{
-          return port.containerPort;
+          return port.containerPort+'/'+protocol;
         }
       });
   }
