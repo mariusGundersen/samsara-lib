@@ -3,7 +3,7 @@ import fs from 'fs-promise';
 import {probe, withArgs, withExactArgs} from 'descartes';
 import {users, addUser, saveUser} from './users';
 import User from './User';
-import u from './util/unindent';
+import u from 'untab';
 
 describe('users', function(){
   beforeEach(function(){

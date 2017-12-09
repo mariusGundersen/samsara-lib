@@ -2,7 +2,7 @@ import upgrade from './upgrade';
 import fs from 'fs-promise';
 import {Jar, withArgs, withExactArgs} from 'descartes';
 import sinon from 'sinon';
-import u from './util/unindent';
+import u from 'untab';
 
 describe("upgrade", function() {
 

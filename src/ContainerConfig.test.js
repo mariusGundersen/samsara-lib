@@ -1,7 +1,7 @@
 import ContainerConfig from './ContainerConfig';
 import sinon from 'sinon';
 import fs from 'fs-promise';
-import u from './util/unindent';
+import u from 'untab';
 
 describe("ContainerConfig", function() {
   it("should toString with the file contents", function(){

@@ -4,7 +4,7 @@ import {Jar, withArgs, withExactArgs} from 'descartes';
 import fs from 'fs-promise';
 import mkdirp from 'mkdirp-promise';
 import fileLogger from './fileLogger';
-import u from '../util/unindent';
+import u from 'untab';
 
 describe("fileLogger", function(){
   it("should be a function", function(){

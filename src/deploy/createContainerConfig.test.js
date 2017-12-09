@@ -3,7 +3,7 @@ import ContainerConfig from '../ContainerConfig';
 import sinon from 'sinon';
 import {Jar, probe, withArgs, withExactArgs} from 'descartes';
 
-import u from '../util/unindent';
+import u from 'untab';
 
 describe("createContainerConfig", function(){
   it("should be a function", function(){

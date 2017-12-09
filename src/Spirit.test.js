@@ -1,7 +1,7 @@
 import Spirit from './Spirit';
 import fs from 'fs-promise';
 import sinon from 'sinon';
-import u from './util/unindent';
+import u from 'untab';
 
 describe("the Spirit", function() {
 
