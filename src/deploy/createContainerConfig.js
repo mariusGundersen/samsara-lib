@@ -12,7 +12,8 @@ export default async function(name, life, containerConfig, getSpirit){
       Links: links,
       Binds: makeBinds(containerConfig.config),
       PortBindings: makePortBindings(containerConfig.ports),
-      VolumesFrom: volumesFrom
+      VolumesFrom: volumesFrom,
+      RestartPolicy: makeRestartPolicy(containerConfig.restartPolicy)
     }
   };
 };
@@ -88,4 +89,8 @@ function getCurrentLifeContainerId(getSpirit, name){
   return getSpirit(name).currentLife
   .then(life => life.container)
   .then(container => container.id);
+}
+
+function makeRestartPolicy(restartPolicy){
+  return restartPolicy || "";
 }

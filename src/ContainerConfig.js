@@ -192,6 +192,12 @@ export default class ContainerConfig{
         }
       });
   }
+  get restartPolicy(){
+    return this.config.restart || "";
+  }
+  set restartPolicy(value){
+    this.config.restart = value;
+  }
   save(){
     const output = yaml.safeDump(this.yaml);
     return fs.writeFile(spiritContainerConfig(this._name), output);

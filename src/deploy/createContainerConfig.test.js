@@ -29,7 +29,8 @@ describe("createContainerConfig", function(){
         Links: [],
         Binds: [],
         VolumesFrom: [],
-        PortBindings: {}
+        PortBindings: {},
+        RestartPolicy: ""
       }
     });
   });
@@ -57,7 +58,8 @@ describe("createContainerConfig", function(){
         Links: [],
         Binds: [],
         VolumesFrom: [],
-        PortBindings: {}
+        PortBindings: {},
+        RestartPolicy: ""
       }
     });
   });
@@ -96,7 +98,8 @@ describe("createContainerConfig", function(){
           '/path/on/host:/read/only/volume:ro'
         ],
         VolumesFrom: [],
-        PortBindings: {}
+        PortBindings: {},
+        RestartPolicy: ""
       }
     });
   });
@@ -150,7 +153,8 @@ describe("createContainerConfig", function(){
         ],
         Binds: [],
         VolumesFrom: [],
-        PortBindings: {}
+        PortBindings: {},
+        RestartPolicy: ""
       }
     });
   });
@@ -184,7 +188,8 @@ describe("createContainerConfig", function(){
           '70/tcp':[{HostPort:'80'}],
           '8080/udp':[{HostPort:'90', HostIp:'127.0.0.1'}],
           '8080/tcpudp':[{HostPort:'90', HostIp:'127.0.0.1'}]
-        }
+        },
+        RestartPolicy: ""
       }
     });
   });
@@ -238,7 +243,8 @@ describe("createContainerConfig", function(){
           '1234abcd',
           'abcd1234:ro'
         ],
-        PortBindings: {}
+        PortBindings: {},
+        RestartPolicy: ""
       }
     });
   });

@@ -18,7 +18,8 @@ export default async function(name, image, tag){
   };
 
   const containerConfig = {
-    image: image+':'+tag
+    image: image+':'+tag,
+    restart: 'unless-stopped'
   };
 
   await mkdirp(spirit(name));
