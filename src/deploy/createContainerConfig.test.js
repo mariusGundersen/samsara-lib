@@ -30,7 +30,10 @@ describe("createContainerConfig", function(){
         Binds: [],
         VolumesFrom: [],
         PortBindings: {},
-        RestartPolicy: ""
+        RestartPolicy: {
+          Name: "",
+          MaximumRetryCount: 0
+        }
       }
     });
   });
@@ -59,7 +62,10 @@ describe("createContainerConfig", function(){
         Binds: [],
         VolumesFrom: [],
         PortBindings: {},
-        RestartPolicy: ""
+        RestartPolicy: {
+          Name: "",
+          MaximumRetryCount: 0
+        }
       }
     });
   });
@@ -99,7 +105,10 @@ describe("createContainerConfig", function(){
         ],
         VolumesFrom: [],
         PortBindings: {},
-        RestartPolicy: ""
+        RestartPolicy: {
+          Name: "",
+          MaximumRetryCount: 0
+        }
       }
     });
   });
@@ -154,7 +163,10 @@ describe("createContainerConfig", function(){
         Binds: [],
         VolumesFrom: [],
         PortBindings: {},
-        RestartPolicy: ""
+        RestartPolicy: {
+          Name: "",
+          MaximumRetryCount: 0
+        }
       }
     });
   });
@@ -189,7 +201,10 @@ describe("createContainerConfig", function(){
           '8080/udp':[{HostPort:'90', HostIp:'127.0.0.1'}],
           '8080/tcpudp':[{HostPort:'90', HostIp:'127.0.0.1'}]
         },
-        RestartPolicy: ""
+        RestartPolicy: {
+          Name: "",
+          MaximumRetryCount: 0
+        }
       }
     });
   });
@@ -244,7 +259,10 @@ describe("createContainerConfig", function(){
           'abcd1234:ro'
         ],
         PortBindings: {},
-        RestartPolicy: ""
+        RestartPolicy: {
+          Name: "",
+          MaximumRetryCount: 0
+        }
       }
     });
   });

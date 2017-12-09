@@ -92,5 +92,8 @@ function getCurrentLifeContainerId(getSpirit, name){
 }
 
 function makeRestartPolicy(restartPolicy){
-  return restartPolicy || "";
+  return {
+    Name: restartPolicy || "",
+    MaximumRetryCount: restartPolicy == 'on-failure' ? 3 : 0
+  };
 }
