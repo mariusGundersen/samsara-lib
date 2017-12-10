@@ -1,6 +1,6 @@
 import fs from 'fs-promise';
 import mkdirp from 'mkdirp-promise';
-import paths from '../paths';
+import * as paths from '../paths';
 
 export default function(eventEmitter){
   let plan;
