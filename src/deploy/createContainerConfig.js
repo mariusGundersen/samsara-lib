@@ -28,7 +28,7 @@ function makeExposedPorts(ports){
       '');
     result[`${port.containerPort}/${protocol}`] = {}
     return result;
-  });
+  }, {});
 }
 
 function makeEnv(environment){
