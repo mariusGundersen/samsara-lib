@@ -6,6 +6,7 @@ export default async function(name, life, containerConfig, getSpirit){
     Image: containerConfig.image+':'+containerConfig.tag,
     name: name + '_v' + life,
     Env: makeEnv(containerConfig.environment),
+    ExposedPorts: makeExposedPorts(containerConfig.ports),
     Volumes: makeVolumes(containerConfig.volumes),
     Labels: makeLabels(name, life),
     HostConfig: {
@@ -17,6 +18,18 @@ export default async function(name, life, containerConfig, getSpirit){
     }
   };
 };
+
+function makeExposedPorts(ports){
+  return (ports || [])
+  .reduce(function(result, port){
+    const protocol = (port.tcp && port.udp ? 'tcpudp' :
+      port.tcp ? 'tcp' :
+      port.udp ? 'udp' :
+      '');
+    result[`${port.containerPort}/${protocol}`] = {}
+    return result;
+  });
+}
 
 function makeEnv(environment){
   return environment
@@ -40,14 +53,14 @@ function makeBinds(config){
 function makePortBindings(ports){
   return (ports || [])
   .reduce(function(result, port){
-    const protocol = (port.tcp == false ? '' : 'tcp') + (port.udp == false ? '' : 'udp');
-    if(port.hostIp && port.hostPort){
-      result[port.containerPort+'/'+protocol] = [{"HostPort": port.hostPort, "HostIp": port.hostIp}];
-    }else if(port.hostPort){
-      result[port.containerPort+'/'+protocol] = [{"HostPort": port.hostPort}];
-    }else{
-      result[port.containerPort+'/'+protocol] = [];
-    }
+    const protocol = (port.tcp && port.udp ? 'tcpudp' :
+      port.tcp ? 'tcp' :
+      port.udp ? 'udp' :
+      '');
+    result[`${port.containerPort}/${protocol}`] = (
+      port.hostIp && port.hostPort ? [{"HostPort": port.hostPort, "HostIp": port.hostIp}] :
+      port.hostPort ? [{"HostPort": port.hostPort}] :
+      []);
     return result;
   }, {});
 }
