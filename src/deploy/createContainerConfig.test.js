@@ -195,7 +195,7 @@ describe("createContainerConfig", function(){
         'samsara.spirit.life': '2',
         'com.example.description': 'Accounting webapp',
         'com.example.department': 'Finance',
-        'com.example.label-with-empty-value': undefined
+        'com.example.label-with-empty-value': ''
       },
       ExposedPorts: {},
       HostConfig: {

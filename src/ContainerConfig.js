@@ -163,7 +163,7 @@ export default class ContainerConfig{
         .map(env => env.split('='))
         .map(pair => ({
           key: pair.shift(),
-          value: pair.length === 0 ? undefined : pair.join('=')
+          value: pair.length === 0 ? '' : pair.join('=')
         }));
     }else{
       return Object.keys(this.config.labels || {})

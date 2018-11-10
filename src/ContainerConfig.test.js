@@ -145,7 +145,7 @@ describe("ContainerConfig", function() {
     containerConfig.labels.should.deep.equal([
       {key: 'com.example.description', value: 'Accounting webapp'},
       {key: 'com.example.department', value: 'Finance'},
-      {key: 'com.example.label-with-empty-value', value: undefined}
+      {key: 'com.example.label-with-empty-value', value: ''}
     ]);
   });
 
@@ -260,7 +260,7 @@ describe("ContainerConfig", function() {
       basicConfig.labels = [
         {key: 'com.example.description', value: 'Accounting webapp'},
         {key: 'com.example.department', value: 'Finance'},
-        {key: 'com.example.label-with-empty-value'}
+        {key: 'com.example.label-with-empty-value', value: ''}
       ];
 
       basicConfig.config.labels.should.deep.equal([

@@ -93,7 +93,7 @@ function makeVolumesFrom(getSpirit, volumesFrom){
 
 function makeLabels(labels, name, life){
   return {
-    ...(labels.reduce((obj, entry) => ({...obj, [entry.key]: entry.value}), {})),
+    ...(labels.reduce((obj, entry) => ({...obj, [entry.key]: entry.value||''}), {})),
     'samsara.spirit.name': name,
     'samsara.spirit.life': life.toString()
   };
