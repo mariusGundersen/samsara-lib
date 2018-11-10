@@ -1,4 +1,4 @@
-export default async function(containerToStart, containerToStop, log){
+export default async function startBeforeStop(containerToStart, containerToStop, log){
   log.message('Starting new container')
   await containerToStart.start();
   log.message(`Container ${containerToStart.id} started`);

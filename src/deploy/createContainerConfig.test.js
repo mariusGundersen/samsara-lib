@@ -25,6 +25,7 @@ describe("createContainerConfig", function(){
         'samsara.spirit.name': 'test',
         'samsara.spirit.life': '2'
       },
+      ExposedPorts: {},
       HostConfig: {
         Links: [],
         Binds: [],
@@ -57,6 +58,7 @@ describe("createContainerConfig", function(){
         'samsara.spirit.name': 'test',
         'samsara.spirit.life': '2'
       },
+      ExposedPorts: {},
       HostConfig: {
         Links: [],
         Binds: [],
@@ -95,6 +97,7 @@ describe("createContainerConfig", function(){
         'samsara.spirit.name': 'test',
         'samsara.spirit.life': '2'
       },
+      ExposedPorts: {},
       HostConfig: {
         Links: [],
         Binds: [
@@ -153,6 +156,7 @@ describe("createContainerConfig", function(){
         'samsara.spirit.name': 'test',
         'samsara.spirit.life': '2'
       },
+      ExposedPorts: {},
       HostConfig: {
         Links: [
           'service:alias',
@@ -160,6 +164,42 @@ describe("createContainerConfig", function(){
           '1234abcd:database',
           'abcd1234:db'
         ],
+        Binds: [],
+        VolumesFrom: [],
+        PortBindings: {},
+        RestartPolicy: {
+          Name: "",
+          MaximumRetryCount: 0
+        }
+      }
+    });
+  });
+
+  it("should have the correct labels values", async function(){
+    const result = createContainerConfig('test', 2, new ContainerConfig('test', u`
+      test:
+        image: 'nginx:latest'
+        labels:
+          - "com.example.description=Accounting webapp"
+          - "com.example.department=Finance"
+          - "com.example.label-with-empty-value"
+    `), _ => _);
+
+    (await result).should.deep.equal({
+      name: 'test_v2',
+      Image: 'nginx:latest',
+      Env: [],
+      Volumes: {},
+      Labels: {
+        'samsara.spirit.name': 'test',
+        'samsara.spirit.life': '2',
+        'com.example.description': 'Accounting webapp',
+        'com.example.department': 'Finance',
+        'com.example.label-with-empty-value': undefined
+      },
+      ExposedPorts: {},
+      HostConfig: {
+        Links: [],
         Binds: [],
         VolumesFrom: [],
         PortBindings: {},
@@ -190,6 +230,12 @@ describe("createContainerConfig", function(){
       Labels: {
         'samsara.spirit.name': 'test',
         'samsara.spirit.life': '2'
+      },
+      ExposedPorts: {
+        '80/tcpudp': {},
+        '70/tcp': {},
+        '8080/tcpudp': {},
+        '8080/udp': {}
       },
       HostConfig: {
         Links: [],
@@ -249,6 +295,7 @@ describe("createContainerConfig", function(){
         'samsara.spirit.name': 'test',
         'samsara.spirit.life': '2'
       },
+      ExposedPorts: {},
       HostConfig: {
         Links: [],
         Binds: [],

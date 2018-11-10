@@ -12,7 +12,7 @@ describe('createLogger', function(){
     });
 
     it('should have an eventEmitter', function(){
-      this.logger.eventEmitter.should.be.defined;
+      this.logger.eventEmitter.should.exist;
     });
 
     it('should emit the right plan', function(done){

@@ -6,31 +6,31 @@
   "dependencies": {
     "ansi-to-html": "^0.3.0",
     "apache-md5": "^1.0.3",
-    "co": "^4.5.4",
-    "dockerode": "^2.1.5",
+    "dockerode": "^2.5.7",
     "dockerode-promise": "^0.1.0",
     "fs-promise": "^0.3.1",
-    "js-yaml": "^3.4.6",
+    "js-yaml": "^3.12.0",
     "mkdirp-promise": "^1.0.2",
+    "react-transition-group": "^2.5.0",
     "untab": "^1.0.1"
   },
   "devDependencies": {
-    "babel-cli": "^6.3.17",
-    "babel-plugin-add-module-exports": "^0.1.2",
-    "babel-plugin-transform-async-to-module-method": "^6.3.13",
-    "babel-preset-es2015-node4": "^2.0.2",
-    "chai": "^3.0.0",
-    "chai-as-promised": "^5.2.0",
+    "@babel/cli": "^7.1.5",
+    "@babel/core": "^7.1.5",
+    "@babel/preset-env": "^7.1.5",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
     "descartes": "~0.0.9",
-    "mocha": "^2.2.5",
+    "mocha": "^5.2.0",
     "sinon": "^1.14.1",
     "sinon-chai": "^2.8.0"
   },
   "scripts": {
     "pretest": "babel -d lib/ src/",
-    "test": "node node_modules/mocha/bin/_mocha test/*.js lib/*.test.js lib/**/*.test.js",
+    "test": "mocha test/*.js lib/*.test.js lib/**/*.test.js",
     "compile": "babel -d lib/ src/",
-    "prepublish": "npm run compile"
+    "prepublish": "npm run compile",
+    "watch": "npm run compile -- --watch & npm run test -- --watch"
   },
   "repository": {
     "type": "git",

@@ -157,6 +157,31 @@ export default class ContainerConfig{
         }
       });
   }
+  get labels(){
+    if(Array.isArray(this.config.labels)){
+      return this.config.labels
+        .map(env => env.split('='))
+        .map(pair => ({
+          key: pair.shift(),
+          value: pair.length === 0 ? undefined : pair.join('=')
+        }));
+    }else{
+      return Object.keys(this.config.labels || {})
+        .map(key => ({
+          key: key,
+          value: this.config.labels[key]
+        }));
+    }
+  }
+  set labels(value){
+    if(!value || !value.length){
+      delete this.config.labels;
+      return;
+    }
+
+    this.config.labels = value
+      .map(x => x.value ? x.key+'='+x.value : x.key);
+  }
   get volumesFrom(){
     return (this.config.volumes_from || [])
       .map(volumeFrom => {

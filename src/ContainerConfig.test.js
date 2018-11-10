@@ -132,6 +132,23 @@ describe("ContainerConfig", function() {
     ]);
   });
 
+  it("should provide the labels", function(){
+    const containerConfig = new ContainerConfig('test', u`
+      test:
+        image: 'nginx:latest'
+        labels:
+          - "com.example.description=Accounting webapp"
+          - "com.example.department=Finance"
+          - "com.example.label-with-empty-value"
+    `);
+
+    containerConfig.labels.should.deep.equal([
+      {key: 'com.example.description', value: 'Accounting webapp'},
+      {key: 'com.example.department', value: 'Finance'},
+      {key: 'com.example.label-with-empty-value', value: undefined}
+    ]);
+  });
+
   it("should provide the volumesFrom", function(){
     const containerConfig = new ContainerConfig('test', u`
       test:
@@ -236,6 +253,20 @@ describe("ContainerConfig", function() {
         'service:alias',
         'spirit(service):service',
         'spirit(service):alias'
+      ]);
+    });
+
+    it("should set the labels", function(){
+      basicConfig.labels = [
+        {key: 'com.example.description', value: 'Accounting webapp'},
+        {key: 'com.example.department', value: 'Finance'},
+        {key: 'com.example.label-with-empty-value'}
+      ];
+
+      basicConfig.config.labels.should.deep.equal([
+        "com.example.description=Accounting webapp",
+        "com.example.department=Finance",
+        "com.example.label-with-empty-value"
       ]);
     });
 

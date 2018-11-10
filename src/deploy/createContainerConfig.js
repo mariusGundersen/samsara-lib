@@ -8,7 +8,7 @@ export default async function(name, life, containerConfig, getSpirit){
     Env: makeEnv(containerConfig.environment),
     ExposedPorts: makeExposedPorts(containerConfig.ports),
     Volumes: makeVolumes(containerConfig.volumes),
-    Labels: makeLabels(name, life),
+    Labels: makeLabels(containerConfig.labels, name, life),
     HostConfig: {
       Links: links,
       Binds: makeBinds(containerConfig.config),
@@ -91,8 +91,9 @@ function makeVolumesFrom(getSpirit, volumesFrom){
   }));
 }
 
-function makeLabels(name, life){
+function makeLabels(labels, name, life){
   return {
+    ...(labels.reduce((obj, entry) => ({...obj, [entry.key]: entry.value}), {})),
     'samsara.spirit.name': name,
     'samsara.spirit.life': life.toString()
   };

@@ -42,12 +42,12 @@ describe("cleanupOldContainers", function(){
   describe("when called with one life belov the limit", function(){
     beforeEach(setup({
       image: {
-        remove: Promise.resolve()
+        async remove() {}
       },
       container: {
         id: '12345abcde',
         inspect: {Image: 'abcde12345'},
-        remove: Promise.resolve()
+        async remove() {}
       },
       lives: [
         {
@@ -83,12 +83,14 @@ describe("cleanupOldContainers", function(){
   describe("when removing container fails", function(){
     beforeEach(setup({
       image: {
-        remove: Promise.resolve()
+        async remove() {}
       },
       container: {
         id: '12345abcde',
         inspect: {Image: 'abcde12345'},
-        remove: Promise.reject(new Error())
+        async remove(){
+          throw new Error('please fail')
+        }
       },
       lives: [
         {
@@ -126,12 +128,14 @@ describe("cleanupOldContainers", function(){
   describe("when removing image fails", function(){
     beforeEach(setup({
       image: {
-        remove: Promise.reject(new Error())
+        async remove(){
+          throw new Error('oh noes');
+        }
       },
       container: {
         id: '12345abcde',
         inspect: {Image: 'abcde12345'},
-        remove: Promise.resolve()
+        async remove() {}
       },
       lives: [
         {
@@ -171,13 +175,13 @@ function setup(config){
   return function(){
     this.logSpy = sinon.spy();
     var image = this.image = {
-      remove: sinon.stub().returns(config.image.remove)
+      remove: sinon.spy(config.image.remove)
     };
 
     var container = this.container = {
       id: config.container.id,
       inspect: sinon.stub().returns(Promise.resolve(config.container.inspect)),
-      remove: sinon.stub().returns(config.container.remove)
+      remove: sinon.spy(config.container.remove)
     };
 
     this.lives = config.lives.map(life => ({

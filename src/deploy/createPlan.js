@@ -14,6 +14,7 @@ export function deploy(spiritSettings){
     }
   })()];
 };
+
 export function revive(spiritSettings){
   return [...(function*(){
     if(spiritSettings.deploymentMethod === 'stop-before-start'){
