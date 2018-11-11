@@ -11,7 +11,7 @@ export default async function(name, life, containerConfig, getSpirit){
     Labels: makeLabels(containerConfig.labels, name, life),
     HostConfig: {
       Links: links,
-      Binds: makeBinds(containerConfig.config),
+      Binds: makeBinds(containerConfig.volumes),
       PortBindings: makePortBindings(containerConfig.ports),
       VolumesFrom: volumesFrom,
       RestartPolicy: makeRestartPolicy(containerConfig.restartPolicy)
@@ -40,14 +40,17 @@ function makeEnv(environment){
 
 function makeVolumes(volumes){
   return (volumes || [])
-    .reduce(function(result, volume){
-      result[volume.containerPath] = {};
-      return result;
-    }, {});
+    .reduce((result, volume) => ({
+      ...result,
+      [volume.containerPath]: {}
+    }), {});
 }
 
-function makeBinds(config){
-  return (config.volumes || []);
+function makeBinds(volumes){
+  return (volumes || [])
+    .filter(v => v.hostPath)
+    .map(({hostPath, containerPath, readOnly}) =>
+      `${hostPath}:${containerPath}`+(readOnly ? ':ro' : ''));
 }
 
 function makePortBindings(ports){

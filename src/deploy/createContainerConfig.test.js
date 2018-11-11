@@ -101,7 +101,6 @@ describe("createContainerConfig", function(){
       HostConfig: {
         Links: [],
         Binds: [
-          '/anonymous/volume',
           '/host/path:/container/path',
           'named-volume:/path/on/container',
           '/path/on/host:/read/only/volume:ro'
