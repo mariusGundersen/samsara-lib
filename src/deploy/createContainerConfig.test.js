@@ -1,15 +1,17 @@
 import { probe, withArgs } from "descartes";
+import { describe, it } from "node:test";
+import "../../test/common.js";
 import ContainerConfig from "../ContainerConfig.js";
 import createContainerConfig from "./createContainerConfig.js";
 
 import u from "untab";
 
-describe("createContainerConfig", function () {
-  it("should be a function", function () {
+describe("createContainerConfig", () => {
+  it("should be a function", () => {
     createContainerConfig.should.be.a("Function");
   });
 
-  it("should have the image and name", async function () {
+  it("should have the image and name", async () => {
     const result = await createContainerConfig(
       "test",
       2,
@@ -46,7 +48,7 @@ describe("createContainerConfig", function () {
     });
   });
 
-  it("should have the correct environment as array values", async function () {
+  it("should have the correct environment as array values", async () => {
     const result = await createContainerConfig(
       "test",
       2,
@@ -85,7 +87,7 @@ describe("createContainerConfig", function () {
     });
   });
 
-  it("should have the correct volumes values", async function () {
+  it("should have the correct volumes values", async () => {
     const result = await createContainerConfig(
       "test",
       2,
@@ -136,7 +138,7 @@ describe("createContainerConfig", function () {
     });
   });
 
-  it("should have the correct links values", async function () {
+  it("should have the correct links values", async () => {
     const getCurrentLife = probe("getCurrentLife");
 
     const result = createContainerConfig(
@@ -203,7 +205,7 @@ describe("createContainerConfig", function () {
     });
   });
 
-  it("should have the correct labels values", async function () {
+  it("should have the correct labels values", async () => {
     const result = createContainerConfig(
       "test",
       2,
@@ -247,7 +249,7 @@ describe("createContainerConfig", function () {
     });
   });
 
-  it("should have the correct port bindings", async function () {
+  it("should have the correct port bindings", async () => {
     const result = await createContainerConfig(
       "test",
       2,
@@ -299,7 +301,7 @@ describe("createContainerConfig", function () {
     });
   });
 
-  it("should have the correct volumesFrom values", async function () {
+  it("should have the correct volumesFrom values", async () => {
     const getCurrentLife = probe("getCurrentLife");
 
     const result = createContainerConfig(

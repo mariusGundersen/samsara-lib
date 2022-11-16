@@ -1,76 +1,75 @@
 import { Jar, withArgs, withExactArgs } from "descartes";
 import fs from "fs/promises";
+import { afterEach, beforeEach, describe, it } from "node:test";
 import path from "path";
 import sinon from "sinon";
 import u from "untab";
+import "../test/common.js";
 import upgrade from "./upgrade.js";
 
-describe("upgrade", function () {
-  beforeEach(function () {
-    this.jar = new Jar();
-    this.readdir = this.jar.probe("fs.readdir");
-    this.stat = this.jar.probe("fs.stat");
-    this.readFile = this.jar.probe("fs.readFile");
-    this.writeFile = this.jar.probe("fs.writeFile");
-    sinon.stub(fs, "readdir").callsFake(this.readdir);
-    sinon.stub(fs, "stat").callsFake(this.stat);
-    sinon.stub(fs, "readFile").callsFake(this.readFile);
-    sinon.stub(fs, "writeFile").callsFake(this.writeFile);
+describe("upgrade", () => {
+  let jar, readdir, stat, readFile, writeFile;
+  beforeEach(() => {
+    jar = new Jar();
+    readdir = jar.probe("fs.readdir");
+    stat = jar.probe("fs.stat");
+    readFile = jar.probe("fs.readFile");
+    writeFile = jar.probe("fs.writeFile");
+    sinon.stub(fs, "readdir").callsFake(readdir);
+    sinon.stub(fs, "stat").callsFake(stat);
+    sinon.stub(fs, "readFile").callsFake(readFile);
+    sinon.stub(fs, "writeFile").callsFake(writeFile);
   });
 
-  afterEach(function () {
+  afterEach(() => {
     fs.readdir.restore();
     fs.stat.restore();
     fs.readFile.restore();
     fs.writeFile.restore();
   });
 
-  it("should work", async function () {
+  it("should work", async () => {
     const result = upgrade();
 
-    this.stat.resolves(isFile(false));
-    await this.stat.called(
-      withExactArgs(path.normalize("config/authentication"))
-    );
+    stat.resolves(isFile(false));
+    await stat.called(withExactArgs(path.normalize("config/authentication")));
 
-    this.readFile.rejects(new Error("file does not exist"));
-    await this.readFile.called(
+    readFile.rejects(new Error("file does not exist"));
+    await readFile.called(
       withExactArgs(path.normalize("config/authentication"), "utf8")
     );
 
-    await this.writeFile
+    await writeFile
       .called(withArgs(path.normalize("config/authentication")))
       .then((call) => {
         const entry = call.args[1].split("\n")[0].split(":");
         entry[0].should.equal("admin");
       });
 
-    this.readdir.resolves(["test", "file.json"]);
-    await this.readdir.called(withExactArgs(path.normalize("config/spirits")));
+    readdir.resolves(["test", "file.json"]);
+    await readdir.called(withExactArgs(path.normalize("config/spirits")));
 
-    this.stat.resolves(isDirectory(true));
-    await this.stat.called(
-      withExactArgs(path.normalize("config/spirits/test"))
-    );
-    this.stat.resolves(isDirectory(false));
-    await this.stat.called(
+    stat.resolves(isDirectory(true));
+    await stat.called(withExactArgs(path.normalize("config/spirits/test")));
+    stat.resolves(isDirectory(false));
+    await stat.called(
       withExactArgs(path.normalize("config/spirits/file.json"))
     );
 
-    this.stat.resolves(isFile(false));
-    await this.stat.called(
+    stat.resolves(isFile(false));
+    await stat.called(
       withExactArgs(path.normalize("config/spirits/test/settings.json"))
     );
-    this.stat.resolves(isFile(false));
-    await this.stat.called(
+    stat.resolves(isFile(false));
+    await stat.called(
       withExactArgs(path.normalize("config/spirits/test/containerConfig.yml"))
     );
-    this.stat.resolves(isFile(true));
-    await this.stat.called(
+    stat.resolves(isFile(true));
+    await stat.called(
       withExactArgs(path.normalize("config/spirits/test/config.json"))
     );
 
-    this.readFile.resolves(
+    readFile.resolves(
       JSON.stringify(
         {
           deploymentMethod: "start-before-stop",
@@ -92,11 +91,11 @@ describe("upgrade", function () {
         "  "
       )
     );
-    await this.readFile.called(
+    await readFile.called(
       withArgs(path.normalize("config/spirits/test/config.json"))
     );
 
-    await this.writeFile
+    await writeFile
       .called(withArgs(path.normalize("config/spirits/test/settings.json")))
       .then((call) => {
         call.args[1].should.equal(
@@ -117,7 +116,7 @@ describe("upgrade", function () {
         );
       });
 
-    await this.writeFile
+    await writeFile
       .called(
         withArgs(path.normalize("config/spirits/test/containerConfig.yml"))
       )
@@ -128,27 +127,25 @@ describe("upgrade", function () {
         `);
       });
 
-    this.readdir.resolves(["1"]);
-    await this.readdir.called(
-      withArgs(path.normalize("config/spirits/test/lives"))
-    );
-    this.stat.resolves(isDirectory(true));
-    await this.stat.called(
+    readdir.resolves(["1"]);
+    await readdir.called(withArgs(path.normalize("config/spirits/test/lives")));
+    stat.resolves(isDirectory(true));
+    await stat.called(
       withExactArgs(path.normalize("config/spirits/test/lives/1"))
     );
 
-    this.stat.resolves(isFile(false));
-    await this.stat.called(
+    stat.resolves(isFile(false));
+    await stat.called(
       withExactArgs(
         path.normalize("config/spirits/test/lives/1/containerConfig.yml")
       )
     );
-    this.stat.resolves(isFile(true));
-    await this.stat.called(
+    stat.resolves(isFile(true));
+    await stat.called(
       withExactArgs(path.normalize("config/spirits/test/lives/1/config.json"))
     );
 
-    this.readFile.resolves(
+    readFile.resolves(
       JSON.stringify(
         {
           deploymentMethod: "start-before-stop",
@@ -170,11 +167,11 @@ describe("upgrade", function () {
         "  "
       )
     );
-    await this.readFile.called(
+    await readFile.called(
       withArgs(path.normalize("config/spirits/test/lives/1/config.json"))
     );
 
-    await this.writeFile
+    await writeFile
       .called(
         withArgs(
           path.normalize("config/spirits/test/lives/1/containerConfig.yml")
@@ -189,7 +186,7 @@ describe("upgrade", function () {
       });
 
     await result;
-    this.jar.done();
+    jar.done();
   });
 });
 

@@ -1,22 +1,25 @@
+import { beforeEach, describe, it } from "node:test";
+import "../../test/common.js";
 import createLogger from "./createLogger.js";
 
-describe("createLogger", function () {
-  it("should be a function", function () {
+describe("createLogger", () => {
+  it("should be a function", () => {
     createLogger.should.be.a("Function");
     createLogger.length.should.equal(1);
   });
 
-  describe("when called", function () {
-    beforeEach(function () {
-      this.logger = createLogger("something");
+  describe("when called", () => {
+    let logger;
+    beforeEach(() => {
+      logger = createLogger("something");
     });
 
-    it("should have an eventEmitter", function () {
-      this.logger.eventEmitter.should.exist;
+    it("should have an eventEmitter", () => {
+      logger.eventEmitter.should.exist;
     });
 
-    it("should emit the right plan", function (done) {
-      this.logger.eventEmitter.on("start", function (event) {
+    it("should emit the right plan", (done) => {
+      logger.eventEmitter.on("start", (event) => {
         event.spirit.should.equal("something");
         event.life.should.equal(15);
         event.plan.should.deep.equal(["test", "done"]);
@@ -24,36 +27,36 @@ describe("createLogger", function () {
         done();
       });
 
-      this.logger.start(15, ["test", "done"], {});
+      logger.start(15, ["test", "done"], {});
     });
 
-    it("should emit the right message", function (done) {
-      this.logger.eventEmitter.on("message", function (event) {
+    it("should emit the right message", (done) => {
+      logger.eventEmitter.on("message", (event) => {
         event.spirit.should.equal("something");
         event.message.should.equal("hello");
         done();
       });
 
-      this.logger.message("hello");
+      logger.message("hello");
     });
 
-    it("should emit the right stage", function (done) {
-      this.logger.eventEmitter.on("stage", function (event) {
+    it("should emit the right stage", (done) => {
+      logger.eventEmitter.on("stage", (event) => {
         event.spirit.should.equal("something");
         done();
       });
 
-      this.logger.stage("hello");
+      logger.stage("hello");
     });
 
-    it("should emit the right end", function (done) {
-      this.logger.eventEmitter.on("stop", function (event) {
+    it("should emit the right end", (done) => {
+      logger.eventEmitter.on("stop", (event) => {
         event.spirit.should.equal("something");
         event.error.should.deep.equal({});
         done();
       });
 
-      this.logger.stop({});
+      logger.stop({});
     });
   });
 });

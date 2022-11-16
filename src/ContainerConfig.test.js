@@ -1,11 +1,13 @@
 import fs from "fs/promises";
+import { afterEach, beforeEach, describe, it } from "node:test";
 import path from "path";
 import sinon from "sinon";
 import u from "untab";
+import "../test/common.js";
 import ContainerConfig from "./ContainerConfig.js";
 
-describe("ContainerConfig", function () {
-  it("should toString with the file contents", function () {
+describe("ContainerConfig", () => {
+  it("should toString with the file contents", () => {
     const containerConfig = new ContainerConfig(
       "test",
       u`
@@ -16,7 +18,7 @@ describe("ContainerConfig", function () {
     containerConfig.toString().should.equal("test:\n  image: 'nginx:latest'\n");
   });
 
-  it("should deserialize the file contents", function () {
+  it("should deserialize the file contents", () => {
     const containerConfig = new ContainerConfig(
       "test",
       u`
@@ -27,7 +29,7 @@ describe("ContainerConfig", function () {
     containerConfig.yaml.should.deep.equal({ test: { image: "nginx:latest" } });
   });
 
-  it("should provide the environment variables as an array", function () {
+  it("should provide the environment variables as an array", () => {
     const containerConfig = new ContainerConfig(
       "test",
       u`
@@ -43,7 +45,7 @@ describe("ContainerConfig", function () {
     ]);
   });
 
-  it("should provide the image", function () {
+  it("should provide the image", () => {
     const containerConfig = new ContainerConfig(
       "test",
       u`
@@ -55,7 +57,7 @@ describe("ContainerConfig", function () {
     containerConfig.image.should.equal("nginx");
   });
 
-  it("should provide the tag", function () {
+  it("should provide the tag", () => {
     const containerConfig = new ContainerConfig(
       "test",
       u`
@@ -67,7 +69,7 @@ describe("ContainerConfig", function () {
     containerConfig.tag.should.equal("latest");
   });
 
-  it("should provide the tag even when it is missing", function () {
+  it("should provide the tag even when it is missing", () => {
     const containerConfig = new ContainerConfig(
       "test",
       u`
@@ -79,7 +81,7 @@ describe("ContainerConfig", function () {
     containerConfig.tag.should.equal("latest");
   });
 
-  it("should provide the environment variables as an array even when it's an object", function () {
+  it("should provide the environment variables as an array even when it's an object", () => {
     const containerConfig = new ContainerConfig(
       "test",
       u`
@@ -95,7 +97,7 @@ describe("ContainerConfig", function () {
     ]);
   });
 
-  it("should provide the volumes", function () {
+  it("should provide the volumes", () => {
     const containerConfig = new ContainerConfig(
       "test",
       u`
@@ -123,7 +125,7 @@ describe("ContainerConfig", function () {
     ]);
   });
 
-  it("should provide the ports", function () {
+  it("should provide the ports", () => {
     const containerConfig = new ContainerConfig(
       "test",
       u`
@@ -161,7 +163,7 @@ describe("ContainerConfig", function () {
     ]);
   });
 
-  it("should provide the links", function () {
+  it("should provide the links", () => {
     const containerConfig = new ContainerConfig(
       "test",
       u`
@@ -183,7 +185,7 @@ describe("ContainerConfig", function () {
     ]);
   });
 
-  it("should provide the labels", function () {
+  it("should provide the labels", () => {
     const containerConfig = new ContainerConfig(
       "test",
       u`
@@ -203,7 +205,7 @@ describe("ContainerConfig", function () {
     ]);
   });
 
-  it("should provide the volumesFrom", function () {
+  it("should provide the volumesFrom", () => {
     const containerConfig = new ContainerConfig(
       "test",
       u`
@@ -225,14 +227,14 @@ describe("ContainerConfig", function () {
     ]);
   });
 
-  describe("setters", function () {
+  describe("setters", () => {
     let basicConfig;
 
-    beforeEach(function () {
+    beforeEach(() => {
       basicConfig = new ContainerConfig("test", "test: {}\n");
     });
 
-    it("should set the config", function () {
+    it("should set the config", () => {
       basicConfig.config = {
         image: "nginx:1.7",
       };
@@ -242,7 +244,7 @@ describe("ContainerConfig", function () {
       });
     });
 
-    it("should set the image", function () {
+    it("should set the image", () => {
       basicConfig.image = "nginx";
 
       basicConfig.config.should.deep.equal({
@@ -250,7 +252,7 @@ describe("ContainerConfig", function () {
       });
     });
 
-    it("should set the image and tag", function () {
+    it("should set the image and tag", () => {
       basicConfig.image = "nginx";
       basicConfig.tag = "1.7";
 
@@ -259,7 +261,7 @@ describe("ContainerConfig", function () {
       });
     });
 
-    it("should set the environment", function () {
+    it("should set the environment", () => {
       basicConfig.environment = [
         { key: "VIRTUAL_HOST", value: "mariusgundersen.net" },
       ];
@@ -269,7 +271,7 @@ describe("ContainerConfig", function () {
       ]);
     });
 
-    it("should set the volumes", function () {
+    it("should set the volumes", () => {
       basicConfig.volumes = [
         { hostPath: "", containerPath: "/container/path", readOnly: false },
         {
@@ -291,7 +293,7 @@ describe("ContainerConfig", function () {
       ]);
     });
 
-    it("should set the ports", function () {
+    it("should set the ports", () => {
       basicConfig.ports = [
         { containerPort: "80", hostPort: "", hostIp: "", udp: true, tcp: true },
         {
@@ -317,7 +319,7 @@ describe("ContainerConfig", function () {
       ]);
     });
 
-    it("should set the links", function () {
+    it("should set the links", () => {
       basicConfig.links = [
         { container: "service", spirit: "", alias: "service" },
         { container: "service", spirit: "", alias: "alias" },
@@ -333,7 +335,7 @@ describe("ContainerConfig", function () {
       ]);
     });
 
-    it("should set the labels", function () {
+    it("should set the labels", () => {
       basicConfig.labels = [
         { key: "com.example.description", value: "Accounting webapp" },
         { key: "com.example.department", value: "Finance" },
@@ -347,7 +349,7 @@ describe("ContainerConfig", function () {
       ]);
     });
 
-    it("should set the volumesFrom", function () {
+    it("should set the volumesFrom", () => {
       basicConfig.volumesFrom = [
         { container: "service", spirit: "", readOnly: false },
         { container: "service", spirit: "", readOnly: true },
@@ -364,16 +366,16 @@ describe("ContainerConfig", function () {
     });
   });
 
-  describe("saving", function () {
-    beforeEach(function () {
+  describe("saving", () => {
+    beforeEach(() => {
       sinon.stub(fs, "writeFile").returns(Promise.resolve());
     });
 
-    afterEach(function () {
+    afterEach(() => {
       fs.writeFile.restore();
     });
 
-    it("should write the contents of the config to the right file", async function () {
+    it("should write the contents of the config to the right file", async () => {
       const containerConfig = new ContainerConfig(
         "test",
         u`
@@ -391,16 +393,16 @@ describe("ContainerConfig", function () {
     });
   });
 
-  describe("saving life", function () {
-    beforeEach(function () {
+  describe("saving life", () => {
+    beforeEach(() => {
       sinon.stub(fs, "writeFile").returns(Promise.resolve());
     });
 
-    afterEach(function () {
+    afterEach(() => {
       fs.writeFile.restore();
     });
 
-    it("should write the contents of the config to the right file", async function () {
+    it("should write the contents of the config to the right file", async () => {
       const containerConfig = new ContainerConfig(
         "test",
         u`

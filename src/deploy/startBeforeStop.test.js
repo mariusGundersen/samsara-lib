@@ -1,85 +1,88 @@
 import { Jar, withArgs } from "descartes";
+import { afterEach, beforeEach, describe, it } from "node:test";
 import sinon from "sinon";
+import "../../test/common.js";
 import startBeforeStop from "./startBeforeStop.js";
 
-describe("startBeforeStop", function () {
-  it("should be a function", function () {
+describe("startBeforeStop", () => {
+  it("should be a function", () => {
     startBeforeStop.should.be.a("Function");
   });
 
-  describe("when called", function () {
-    beforeEach(function () {
+  describe("when called", () => {
+    let clock, startSpy, stopSpy, logSpy, stageSpy;
+    beforeEach(() => {
       const jar = new Jar();
-      this.clock = sinon.useFakeTimers();
-      this.startSpy = jar.probe("container.start");
-      this.stopSpy = jar.probe("container.stop");
-      this.logSpy = jar.sensor("log.message");
-      this.stageSpy = jar.sensor("log.stage");
+      clock = sinon.useFakeTimers();
+      startSpy = jar.probe("container.start");
+      stopSpy = jar.probe("container.stop");
+      logSpy = jar.sensor("log.message");
+      stageSpy = jar.sensor("log.stage");
     });
 
-    afterEach(function () {
-      this.clock.restore();
+    afterEach(() => {
+      clock.restore();
     });
 
-    it("should do things in the right order", async function () {
+    it("should do things in the right order", async () => {
       const result = startBeforeStop(
-        { start: this.startSpy, id: "startId" },
-        { stop: this.stopSpy, id: "stopId" },
-        { message: this.logSpy, stage: this.stageSpy }
+        { start: startSpy, id: "startId" },
+        { stop: stopSpy, id: "stopId" },
+        { message: logSpy, stage: stageSpy }
       );
 
-      await this.logSpy.called(withArgs("Starting new container"));
+      await logSpy.called(withArgs("Starting new container"));
 
-      await this.startSpy.called();
+      await startSpy.called();
 
-      await this.logSpy.called(withArgs("Container startId started"));
+      await logSpy.called(withArgs("Container startId started"));
 
-      await this.stageSpy.called();
+      await stageSpy.called();
 
-      await this.logSpy.called(withArgs("Waiting 5 seconds"));
+      await logSpy.called(withArgs("Waiting 5 seconds"));
 
-      this.clock.tick(5000);
+      clock.tick(5000);
 
-      await this.logSpy.called(withArgs("Waited 5 seconds"));
+      await logSpy.called(withArgs("Waited 5 seconds"));
 
-      await this.logSpy.called(withArgs("Stopping previous container"));
+      await logSpy.called(withArgs("Stopping previous container"));
 
-      await this.stopSpy.called();
+      await stopSpy.called();
 
-      await this.logSpy.called(withArgs("Container stopId stopped"));
+      await logSpy.called(withArgs("Container stopId stopped"));
     });
   });
 
-  describe("when called without any container to stop", function () {
-    beforeEach(function () {
+  describe("when called without any container to stop", () => {
+    let clock, startSpy, stopSpy, logSpy, stageSpy;
+    beforeEach(() => {
       const jar = new Jar();
-      this.clock = sinon.useFakeTimers();
-      this.startSpy = jar.probe();
-      this.stopSpy = jar.sensor();
-      this.logSpy = jar.sensor();
-      this.stageSpy = jar.sensor();
+      clock = sinon.useFakeTimers();
+      startSpy = jar.probe();
+      stopSpy = jar.sensor();
+      logSpy = jar.sensor();
+      stageSpy = jar.sensor();
     });
 
-    afterEach(function () {
-      this.clock.restore();
+    afterEach(() => {
+      clock.restore();
     });
 
-    it("should do things in the right order", async function () {
-      const result = startBeforeStop(
-        { start: this.startSpy, id: "startId" },
-        null,
-        { message: this.logSpy, stage: this.stageSpy }
-      );
+    it("should do things in the right order", async () => {
+      const result = startBeforeStop({ start: startSpy, id: "startId" }, null, {
+        message: logSpy,
+        stage: stageSpy,
+      });
 
-      await this.logSpy.called(withArgs("Starting new container"));
+      await logSpy.called(withArgs("Starting new container"));
 
-      await this.startSpy.called();
+      await startSpy.called();
 
-      await this.logSpy.called(withArgs("Container startId started"));
+      await logSpy.called(withArgs("Container startId started"));
 
-      await this.stageSpy.called();
+      await stageSpy.called();
 
-      await this.logSpy.called(withArgs("No container to stop"));
+      await logSpy.called(withArgs("No container to stop"));
     });
   });
 });

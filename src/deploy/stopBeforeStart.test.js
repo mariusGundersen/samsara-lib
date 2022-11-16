@@ -1,80 +1,83 @@
 import { Jar, withArgs } from "descartes";
+import { beforeEach, describe, it } from "node:test";
+import "../../test/common.js";
 import stopBeforeStart from "./stopBeforeStart.js";
 
-describe("stopBeforeStart", function () {
-  it("should be a function", function () {
+describe("stopBeforeStart", () => {
+  it("should be a function", () => {
     stopBeforeStart.should.be.a("Function");
   });
 
-  describe("when called", function () {
-    beforeEach(function () {
+  describe("when called", () => {
+    let startSpy, stopSpy, restartSpy, logSpy, stageSpy;
+    beforeEach(() => {
       const jar = new Jar();
-      this.startSpy = jar.probe("containerToStart.start");
-      this.stopSpy = jar.probe("containerToStop.stop");
-      this.restartSpy = jar.probe("containerToStop.start");
-      this.logSpy = jar.sensor("log.message");
-      this.stageSpy = jar.sensor("log.stage");
+      startSpy = jar.probe("containerToStart.start");
+      stopSpy = jar.probe("containerToStop.stop");
+      restartSpy = jar.probe("containerToStop.start");
+      logSpy = jar.sensor("log.message");
+      stageSpy = jar.sensor("log.stage");
     });
 
-    it("should do things in the right order", async function () {
+    it("should do things in the right order", async () => {
       stopBeforeStart(
-        { stop: this.stopSpy, id: "stopId" },
-        { start: this.startSpy, id: "startId" },
-        { message: this.logSpy, stage: this.stageSpy }
+        { stop: stopSpy, id: "stopId" },
+        { start: startSpy, id: "startId" },
+        { message: logSpy, stage: stageSpy }
       );
 
-      await this.logSpy.called(withArgs("Stopping previous container"));
+      await logSpy.called(withArgs("Stopping previous container"));
 
-      await this.stopSpy.called();
+      await stopSpy.called();
 
-      await this.logSpy.called(withArgs("Container stopId stopped"));
+      await logSpy.called(withArgs("Container stopId stopped"));
 
-      await this.stageSpy.called();
+      await stageSpy.called();
 
-      await this.logSpy.called(withArgs("Starting new container"));
+      await logSpy.called(withArgs("Starting new container"));
 
-      await this.startSpy.called();
+      await startSpy.called();
 
-      await this.logSpy.called(withArgs("Container startId started"));
+      await logSpy.called(withArgs("Container startId started"));
     });
 
-    describe("without a container to stop", function () {
-      it("should not attempt to stop it", async function () {
+    describe("without a container to stop", () => {
+      it("should not attempt to stop it", async () => {
         stopBeforeStart(
           null,
-          { start: this.startSpy, id: "startId" },
-          { message: this.logSpy, stage: this.stageSpy }
+          { start: startSpy, id: "startId" },
+          { message: logSpy, stage: stageSpy }
         );
 
-        await this.logSpy.called(withArgs("No container to stop"));
+        await logSpy.called(withArgs("No container to stop"));
 
-        await this.stageSpy.called();
+        await stageSpy.called();
 
-        await this.logSpy.called(withArgs("Starting new container"));
+        await logSpy.called(withArgs("Starting new container"));
 
-        await this.startSpy.called();
+        await startSpy.called();
 
-        await this.logSpy.called(withArgs("Container startId started"));
+        await logSpy.called(withArgs("Container startId started"));
       });
 
-      describe("and starting fails", function () {
-        it("should not attempt to restart it", async function () {
+      describe("and starting fails", () => {
+        it("should not attempt to restart it", async () => {
           const result = stopBeforeStart(
             null,
-            { start: this.startSpy },
-            { message: this.logSpy, stage: this.stageSpy }
+            { start: startSpy },
+            { message: logSpy, stage: stageSpy }
           );
 
-          await this.logSpy.called(withArgs("No container to stop"));
+          await logSpy.called(withArgs("No container to stop"));
 
-          await this.stageSpy.called();
+          await stageSpy.called();
 
-          await this.logSpy.called(withArgs("Starting new container"));
+          await logSpy.called(withArgs("Starting new container"));
 
-          this.startSpy.rejects(new Error());
-          await this.startSpy.called();
+          startSpy.rejects(new Error());
+          await startSpy.called();
 
-          await this.logSpy.called(withArgs("Could not start new container"));
+          await logSpy.called(withArgs("Could not start new container"));
 
           try {
             await result;
@@ -85,18 +88,18 @@ describe("stopBeforeStart", function () {
       });
     });
 
-    describe("and stopping fails", function () {
-      it("should abort", async function () {
+    describe("and stopping fails", () => {
+      it("should abort", async () => {
         const result = stopBeforeStart(
-          { stop: this.stopSpy },
-          { start: this.startSpy },
-          { message: this.logSpy, stage: this.stageSpy }
+          { stop: stopSpy },
+          { start: startSpy },
+          { message: logSpy, stage: stageSpy }
         );
 
-        await this.logSpy.called(withArgs("Stopping previous container"));
+        await logSpy.called(withArgs("Stopping previous container"));
 
-        this.stopSpy.rejects(new Error());
-        await this.stopSpy.called();
+        stopSpy.rejects(new Error());
+        await stopSpy.called();
 
         try {
           await result;
@@ -106,38 +109,38 @@ describe("stopBeforeStart", function () {
       });
     });
 
-    describe("and starting fails", function () {
-      it("should attempt to restart the stop container", async function () {
+    describe("and starting fails", () => {
+      it("should attempt to restart the stop container", async () => {
         const result = stopBeforeStart(
-          { stop: this.stopSpy, start: this.restartSpy, id: "stopId" },
-          { start: this.startSpy },
-          { message: this.logSpy, stage: this.stageSpy }
+          { stop: stopSpy, start: restartSpy, id: "stopId" },
+          { start: startSpy },
+          { message: logSpy, stage: stageSpy }
         );
 
-        await this.logSpy.called(withArgs("Stopping previous container"));
+        await logSpy.called(withArgs("Stopping previous container"));
 
-        await this.stopSpy.called();
+        await stopSpy.called();
 
-        await this.logSpy.called(withArgs("Container stopId stopped"));
+        await logSpy.called(withArgs("Container stopId stopped"));
 
-        await this.stageSpy.called();
+        await stageSpy.called();
 
-        await this.logSpy.called(withArgs("Starting new container"));
+        await logSpy.called(withArgs("Starting new container"));
 
-        this.startSpy.rejects(new Error());
-        await this.startSpy.called();
+        startSpy.rejects(new Error());
+        await startSpy.called();
 
-        await this.logSpy.called(withArgs("Could not start new container"));
+        await logSpy.called(withArgs("Could not start new container"));
 
-        await this.logSpy.called();
+        await logSpy.called();
 
-        await this.logSpy.called(withArgs("Attempting to rollback"));
+        await logSpy.called(withArgs("Attempting to rollback"));
 
-        await this.logSpy.called(withArgs("Starting previous container"));
+        await logSpy.called(withArgs("Starting previous container"));
 
-        await this.restartSpy.called();
+        await restartSpy.called();
 
-        await this.logSpy.called(withArgs("Previous container started"));
+        await logSpy.called(withArgs("Previous container started"));
 
         try {
           await result;
@@ -147,43 +150,43 @@ describe("stopBeforeStart", function () {
       });
     });
 
-    describe("and restarting fails", function () {
-      it("should attempt to restart the stop container", async function () {
+    describe("and restarting fails", () => {
+      it("should attempt to restart the stop container", async () => {
         const result = stopBeforeStart(
-          { stop: this.stopSpy, start: this.restartSpy, id: "stopId" },
-          { start: this.startSpy },
-          { message: this.logSpy, stage: this.stageSpy }
+          { stop: stopSpy, start: restartSpy, id: "stopId" },
+          { start: startSpy },
+          { message: logSpy, stage: stageSpy }
         );
 
-        await this.logSpy.called(withArgs("Stopping previous container"));
+        await logSpy.called(withArgs("Stopping previous container"));
 
-        await this.stopSpy.called();
+        await stopSpy.called();
 
-        await this.logSpy.called(withArgs("Container stopId stopped"));
+        await logSpy.called(withArgs("Container stopId stopped"));
 
-        await this.stageSpy.called();
+        await stageSpy.called();
 
-        await this.logSpy.called(withArgs("Starting new container"));
+        await logSpy.called(withArgs("Starting new container"));
 
-        this.startSpy.rejects(new Error());
-        await this.startSpy.called();
+        startSpy.rejects(new Error());
+        await startSpy.called();
 
-        await this.logSpy.called(withArgs("Could not start new container"));
+        await logSpy.called(withArgs("Could not start new container"));
 
-        await this.logSpy.called();
+        await logSpy.called();
 
-        await this.logSpy.called(withArgs("Attempting to rollback"));
+        await logSpy.called(withArgs("Attempting to rollback"));
 
-        await this.logSpy.called(withArgs("Starting previous container"));
+        await logSpy.called(withArgs("Starting previous container"));
 
-        this.restartSpy.rejects(new Error());
-        await this.restartSpy.called();
+        restartSpy.rejects(new Error());
+        await restartSpy.called();
 
-        await this.logSpy.called(
+        await logSpy.called(
           withArgs("Failed to rollback to previous container")
         );
 
-        await this.logSpy.called();
+        await logSpy.called();
 
         try {
           await result;

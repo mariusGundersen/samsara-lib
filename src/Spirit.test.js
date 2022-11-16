@@ -1,34 +1,36 @@
 import fs from "fs/promises";
+import { afterEach, beforeEach, describe, it } from "node:test";
 import path from "path";
 import sinon from "sinon";
 import u from "untab";
+import "../test/common.js";
 import Spirit from "./Spirit.js";
 
-describe("the Spirit", function () {
-  it("should export a constructor function", function () {
+describe("the Spirit", () => {
+  it("should export a constructor function", () => {
     Spirit.should.be.an.instanceOf(Function);
   });
 
-  describe("instance", function () {
+  describe("instance", () => {
     let instance,
       docker = {
         listContainers: sinon.stub(),
       };
 
-    beforeEach(function () {
+    beforeEach(() => {
       instance = new Spirit("test", docker);
     });
 
-    afterEach(function () {
+    afterEach(() => {
       docker.listContainers.reset();
     });
 
-    it("should be a Spirit", function () {
+    it("should be a Spirit", () => {
       instance.should.be.an.instanceOf(Spirit);
     });
 
-    describe("isDeploying", function () {
-      beforeEach(async function () {
+    describe("isDeploying", () => {
+      beforeEach(async () => {
         sinon.stub(fs, "access").resolves();
 
         because: {
@@ -36,21 +38,21 @@ describe("the Spirit", function () {
         }
       });
 
-      afterEach(function () {
+      afterEach(() => {
         fs.access.restore();
       });
 
-      it("should check if the right file exists", function () {
+      it("should check if the right file exists", () => {
         fs.access.should.have.been.calledWith(
           path.normalize("config/spirits/test/deploy.lock")
         );
       });
     });
 
-    describe("containerConfig", function () {
+    describe("containerConfig", () => {
       let result;
 
-      beforeEach(async function () {
+      beforeEach(async () => {
         sinon.stub(fs, "readFile").returns(
           Promise.resolve(u`
             test:
@@ -63,21 +65,21 @@ describe("the Spirit", function () {
         }
       });
 
-      afterEach(function () {
+      afterEach(() => {
         fs.readFile.restore();
       });
 
-      it("should read the correct file", function () {
+      it("should read the correct file", () => {
         fs.readFile.should.have.been.calledWith(
           path.normalize("config/spirits/test/containerConfig.yml")
         );
       });
     });
 
-    describe("settings", function () {
+    describe("settings", () => {
       let result;
 
-      beforeEach(async function () {
+      beforeEach(async () => {
         sinon
           .stub(fs, "readFile")
           .returns(Promise.resolve(JSON.stringify({ name: "test" })));
@@ -87,22 +89,22 @@ describe("the Spirit", function () {
         }
       });
 
-      afterEach(function () {
+      afterEach(() => {
         fs.readFile.restore();
       });
 
-      it("should read the correct file", function () {
+      it("should read the correct file", () => {
         fs.readFile.should.have.been.calledWith(
           path.normalize("config/spirits/test/settings.json")
         );
       });
 
-      it("should return json", function () {
+      it("should return json", () => {
         result.should.deep.equal({ name: "test" });
       });
 
-      describe("mutate", function () {
-        beforeEach(async function () {
+      describe("mutate", () => {
+        beforeEach(async () => {
           sinon.stub(fs, "writeFile").returns(Promise.resolve());
 
           because: {
@@ -112,29 +114,29 @@ describe("the Spirit", function () {
           }
         });
 
-        it("should read the correct file", function () {
+        it("should read the correct file", () => {
           fs.readFile.should.have.been.calledWith(
             path.normalize("config/spirits/test/settings.json")
           );
         });
 
-        it("should write the correct file and content", function () {
+        it("should write the correct file and content", () => {
           fs.writeFile.should.have.been.calledWith(
             path.normalize("config/spirits/test/settings.json"),
             JSON.stringify({ name: "hello" }, null, "  ")
           );
         });
 
-        afterEach(function () {
+        afterEach(() => {
           fs.writeFile.restore();
         });
       });
     });
 
-    describe("status stopped", function () {
+    describe("status stopped", () => {
       let result;
 
-      beforeEach(async function () {
+      beforeEach(async () => {
         docker.listContainers.returns(Promise.resolve([]));
 
         because: {
@@ -142,22 +144,22 @@ describe("the Spirit", function () {
         }
       });
 
-      it("should filter correctly", function () {
+      it("should filter correctly", () => {
         docker.listContainers.should.have.been.calledWith({
           filters:
             '{"label":["samsara.spirit.life","samsara.spirit.name=test"],"status":["running"]}',
         });
       });
 
-      it("should be stopped", function () {
+      it("should be stopped", () => {
         result.should.deep.equal("stopped");
       });
     });
 
-    describe("status running", function () {
+    describe("status running", () => {
       let result;
 
-      beforeEach(async function () {
+      beforeEach(async () => {
         docker.listContainers.returns(Promise.resolve([{}]));
 
         because: {
@@ -165,14 +167,14 @@ describe("the Spirit", function () {
         }
       });
 
-      it("should filter correctly", function () {
+      it("should filter correctly", () => {
         docker.listContainers.should.have.been.calledWith({
           filters:
             '{"label":["samsara.spirit.life","samsara.spirit.name=test"],"status":["running"]}',
         });
       });
 
-      it("should be stopped", function () {
+      it("should be stopped", () => {
         result.should.deep.equal("running");
       });
     });

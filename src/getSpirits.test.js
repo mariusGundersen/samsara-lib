@@ -1,108 +1,107 @@
 import { Jar, withArgs } from "descartes";
 import fs from "fs/promises";
+import { afterEach, beforeEach, describe, it } from "node:test";
 import path from "path";
 import sinon from "sinon";
+import "../test/common.js";
 import getSpirits from "./getSpirits.js";
 
-describe("getSpirits", function () {
-  beforeEach(async function () {
-    this.jar = new Jar();
-    this.readdir = this.jar.probe("fs.readdir");
-    this.stat = this.jar.probe("fs.stat");
-    this.listContainers = this.jar.probe("docker.listContainers");
+describe("getSpirits", () => {
+  let jar, readdir, stat, listContainers, docker;
+  beforeEach(async () => {
+    jar = new Jar();
+    readdir = jar.probe("fs.readdir");
+    stat = jar.probe("fs.stat");
+    listContainers = jar.probe("docker.listContainers");
 
-    sinon.stub(fs, "readdir").callsFake(this.readdir);
+    sinon.stub(fs, "readdir").callsFake(readdir);
 
-    sinon.stub(fs, "stat").callsFake(this.stat);
+    sinon.stub(fs, "stat").callsFake(stat);
 
-    this.docker = {
-      listContainers: this.listContainers,
+    docker = {
+      listContainers: listContainers,
     };
   });
 
-  afterEach(function () {
+  afterEach(() => {
     fs.readdir.restore();
     fs.stat.restore();
   });
 
-  it("should return the spirits", async function () {
-    const result = getSpirits(this.docker);
+  it("should return the spirits", async () => {
+    const result = getSpirits(docker);
 
-    this.listContainers.resolves([]);
-    await this.listContainers.called().then((call) => {
+    listContainers.resolves([]);
+    await listContainers.called().then((call) => {
       call.args[0].all.should.equal(true);
       call.args[0].filters.should.equal(
         '{"label":["samsara.spirit.life","samsara.spirit.name"]}'
       );
     });
 
-    this.readdir.resolves(["Test", "website", "database"]);
-    await this.readdir.called(withArgs(path.normalize("config/spirits")));
+    readdir.resolves(["Test", "website", "database"]);
+    await readdir.called(withArgs(path.normalize("config/spirits")));
 
-    this.stat.resolves({
+    stat.resolves({
       isDirectory() {
         return true;
       },
     });
-    await this.stat.called(withArgs(path.normalize("config/spirits/Test")));
-    await this.stat.called(withArgs(path.normalize("config/spirits/website")));
-    await this.stat.called(withArgs(path.normalize("config/spirits/database")));
+    await stat.called(withArgs(path.normalize("config/spirits/Test")));
+    await stat.called(withArgs(path.normalize("config/spirits/website")));
+    await stat.called(withArgs(path.normalize("config/spirits/database")));
 
-    this.readdir.resolves([]);
-    await this.readdir.called(
+    readdir.resolves([]);
+    await readdir.called(
       withArgs(path.normalize("config/spirits/database/lives"))
     );
-    await this.readdir.called(
-      withArgs(path.normalize("config/spirits/Test/lives"))
-    );
-    await this.readdir.called(
+    await readdir.called(withArgs(path.normalize("config/spirits/Test/lives")));
+    await readdir.called(
       withArgs(path.normalize("config/spirits/website/lives"))
     );
 
-    this.stat.rejects(new Error());
-    await this.stat.called(
+    stat.rejects(new Error());
+    await stat.called(
       withArgs(path.normalize("config/spirits/database/deploy.lock"))
     );
-    await this.stat.called(
+    await stat.called(
       withArgs(path.normalize("config/spirits/Test/deploy.lock"))
     );
-    await this.stat.called(
+    await stat.called(
       withArgs(path.normalize("config/spirits/website/deploy.lock"))
     );
 
     const spirits = await result;
     spirits.map((x) => x.name).should.eql(["database", "Test", "website"]);
-    this.jar.done();
+    jar.done();
   });
 
-  it("should work when a spirit has no lives", async function () {
-    const result = getSpirits(this.docker);
+  it("should work when a spirit has no lives", async () => {
+    const result = getSpirits(docker);
 
-    this.listContainers.resolves([]);
-    await this.listContainers.called().then((call) => {
+    listContainers.resolves([]);
+    await listContainers.called().then((call) => {
       call.args[0].all.should.equal(true);
       call.args[0].filters.should.equal(
         '{"label":["samsara.spirit.life","samsara.spirit.name"]}'
       );
     });
 
-    this.readdir.resolves(["Test"]);
-    await this.readdir.called(withArgs(path.normalize("config/spirits")));
+    readdir.resolves(["Test"]);
+    await readdir.called(withArgs(path.normalize("config/spirits")));
 
-    this.stat.resolves({
+    stat.resolves({
       isDirectory() {
         return true;
       },
     });
-    await this.stat.called(withArgs(path.normalize("config/spirits/Test")));
+    await stat.called(withArgs(path.normalize("config/spirits/Test")));
 
-    this.readdir.resolves([]);
-    await this.readdir.called(
-      withArgs(path.normalize("config/spirits/Test/lives"))
-    );
+    readdir.resolves([]);
+    await readdir.called(withArgs(path.normalize("config/spirits/Test/lives")));
 
-    this.stat.rejects(new Error());
-    await this.stat.called(
+    stat.rejects(new Error());
+    await stat.called(
       withArgs(path.normalize("config/spirits/Test/deploy.lock"))
     );
 
@@ -111,52 +110,46 @@ describe("getSpirits", function () {
     spirits[0].lives.should.eql([]);
     spirits[0].state.should.equal("dead");
     spirits[0].life.should.equal("?");
-    this.jar.done();
+    jar.done();
   });
 
-  it("should work when a spirit has lives", async function () {
-    const result = getSpirits(this.docker);
+  it("should work when a spirit has lives", async () => {
+    const result = getSpirits(docker);
 
-    this.listContainers.resolves([
+    listContainers.resolves([
       createContainer("Test", 2, "Exited (1) 2 minutes ago"),
       createContainer("Test", 3, "Up 2 minutes"),
     ]);
-    await this.listContainers.called().then((call) => {
+    await listContainers.called().then((call) => {
       call.args[0].all.should.equal(true);
       call.args[0].filters.should.equal(
         '{"label":["samsara.spirit.life","samsara.spirit.name"]}'
       );
     });
 
-    this.readdir.resolves(["Test"]);
-    await this.readdir.called(withArgs(path.normalize("config/spirits")));
+    readdir.resolves(["Test"]);
+    await readdir.called(withArgs(path.normalize("config/spirits")));
 
-    this.stat.resolves({
+    stat.resolves({
       isDirectory() {
         return true;
       },
     });
-    await this.stat.called(withArgs(path.normalize("config/spirits/Test")));
+    await stat.called(withArgs(path.normalize("config/spirits/Test")));
 
-    this.readdir.resolves(["1", "2"]);
-    await this.readdir.called(
-      withArgs(path.normalize("config/spirits/Test/lives"))
-    );
+    readdir.resolves(["1", "2"]);
+    await readdir.called(withArgs(path.normalize("config/spirits/Test/lives")));
 
-    this.stat.resolves({
+    stat.resolves({
       isDirectory() {
         return true;
       },
     });
-    await this.stat.called(
-      withArgs(path.normalize("config/spirits/Test/lives/1"))
-    );
-    await this.stat.called(
-      withArgs(path.normalize("config/spirits/Test/lives/2"))
-    );
+    await stat.called(withArgs(path.normalize("config/spirits/Test/lives/1")));
+    await stat.called(withArgs(path.normalize("config/spirits/Test/lives/2")));
 
-    this.stat.rejects(new Error());
-    await this.stat.called(
+    stat.rejects(new Error());
+    await stat.called(
       withArgs(path.normalize("config/spirits/Test/deploy.lock"))
     );
 
@@ -176,7 +169,7 @@ describe("getSpirits", function () {
     lives[2].state.should.equal("running");
     lives[2].uptime.should.equal("2 minutes");
 
-    this.jar.done();
+    jar.done();
   });
 });
 

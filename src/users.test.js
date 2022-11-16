@@ -1,45 +1,48 @@
 import { probe, withArgs, withExactArgs } from "descartes";
 import fs from "fs/promises";
+import { afterEach, beforeEach, describe, it } from "node:test";
 import path from "path";
 import sinon from "sinon";
 import u from "untab";
+import "../test/common.js";
 import User from "./User.js";
 import { addUser, saveUser, users } from "./users.js";
 
-describe("users", function () {
-  beforeEach(function () {
-    this.readFile = probe("fs.readFile");
-    sinon.stub(fs, "readFile").callsFake(this.readFile);
+describe("users", () => {
+  let readFile, writeFile;
+  beforeEach(() => {
+    readFile = probe("fs.readFile");
+    sinon.stub(fs, "readFile").callsFake(readFile);
 
-    this.writeFile = probe("fs.writeFile");
-    sinon.stub(fs, "writeFile").callsFake(this.writeFile);
+    writeFile = probe("fs.writeFile");
+    sinon.stub(fs, "writeFile").callsFake(writeFile);
   });
 
-  afterEach(function () {
+  afterEach(() => {
     fs.readFile.restore();
     fs.writeFile.restore();
   });
 
-  describe("getting users", function () {
-    it("should return an empty array when file does not exist", async function () {
+  describe("getting users", () => {
+    it("should return an empty array when file does not exist", async () => {
       const result = users();
 
-      this.readFile.rejects(new Error("file does not exist"));
-      await this.readFile.called(
+      readFile.rejects(new Error("file does not exist"));
+      await readFile.called(
         withExactArgs(path.normalize("config/authentication"), "utf8")
       );
 
       (await result).should.deep.equal([]);
     });
 
-    it("should return an a user for each line in the file", async function () {
+    it("should return an a user for each line in the file", async () => {
       const result = users();
 
-      this.readFile.resolves(u`
+      readFile.resolves(u`
         admin:secret
         user2:hashedPassword
       `);
-      await this.readFile.called(
+      await readFile.called(
         withExactArgs(path.normalize("config/authentication"), "utf8")
       );
 
@@ -54,17 +57,17 @@ describe("users", function () {
     });
   });
 
-  describe("adding user", function () {
-    it("should add the correct user at the end of the list", async function () {
+  describe("adding user", () => {
+    it("should add the correct user at the end of the list", async () => {
       const result = addUser("username", "secret");
 
-      this.readFile.rejects(new Error("file does not exist"));
-      await this.readFile.called(
+      readFile.rejects(new Error("file does not exist"));
+      await readFile.called(
         withExactArgs(path.normalize("config/authentication"), "utf8")
       );
 
-      this.writeFile.resolves();
-      await this.writeFile
+      writeFile.resolves();
+      await writeFile
         .called(withArgs(path.normalize("config/authentication")))
         .then((call) => {
           const content = call.args[1].split("\n");
@@ -77,31 +80,31 @@ describe("users", function () {
     });
   });
 
-  describe("saving user", function () {
-    it("should throw if the user doesn't already exist", async function () {
+  describe("saving user", () => {
+    it("should throw if the user doesn't already exist", async () => {
       const result = saveUser(new User("username", "secret"));
 
-      this.readFile.rejects(new Error("file does not exist"));
-      await this.readFile.called(
+      readFile.rejects(new Error("file does not exist"));
+      await readFile.called(
         withExactArgs(path.normalize("config/authentication"), "utf8")
       );
 
       await result.should.be.rejected;
     });
 
-    it("should update the existing user", async function () {
+    it("should update the existing user", async () => {
       const result = saveUser(new User("admin", "secret"));
 
-      this.readFile.resolves(u`
+      readFile.resolves(u`
         admin:secret
         user2:hashedPassword
       `);
-      await this.readFile.called(
+      await readFile.called(
         withExactArgs(path.normalize("config/authentication"), "utf8")
       );
 
-      this.writeFile.resolves();
-      await this.writeFile
+      writeFile.resolves();
+      await writeFile
         .called(withArgs(path.normalize("config/authentication")))
         .then((call) => {
           const content = call.args[1].split("\n");

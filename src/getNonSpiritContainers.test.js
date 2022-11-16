@@ -1,10 +1,12 @@
 import { Jar } from "descartes";
+import { describe, it } from "node:test";
+import "../test/common.js";
 import getNonSpiritContainers from "./getNonSpiritContainers.js";
 
-describe("getNonSpiritContainers", function () {
+describe("getNonSpiritContainers", () => {
   let result, docker;
 
-  it("should return only containers without labels", async function () {
+  it("should return only containers without labels", async () => {
     const jar = new Jar();
     const listContainers = jar.probe("docker.listContainers");
 

@@ -1,17 +1,20 @@
 import { Jar, withArgs, withExactArgs } from "descartes";
+import { beforeEach, describe, it } from "node:test";
+import "../../test/common.js";
 import pull from "./pull.js";
 
-describe("pull", function () {
-  it("should be a function", function () {
+describe("pull", () => {
+  it("should be a function", () => {
     pull.should.be.a("Function");
   });
 
-  describe("when called", function () {
-    beforeEach(function () {
+  describe("when called", () => {
+    let logSpy, stream, docker;
+    beforeEach(() => {
       const jar = new Jar();
-      this.logSpy = jar.sensor("log");
-      this.stream = {};
-      this.docker = {
+      logSpy = jar.sensor("log");
+      stream = {};
+      docker = {
         pull: jar.probe("pull"),
         $subject: {
           modem: {
@@ -21,20 +24,20 @@ describe("pull", function () {
       };
     });
 
-    it("pull the image", async function () {
-      const test = pull("test:latest", this.docker, this.logSpy);
+    it("pull the image", async () => {
+      const test = pull("test:latest", docker, logSpy);
 
-      await this.logSpy.called(withExactArgs("Pulling image test:latest"));
+      await logSpy.called(withExactArgs("Pulling image test:latest"));
 
-      this.docker.pull.resolves(this.stream);
-      await this.docker.pull.called(withExactArgs("test:latest"));
+      docker.pull.resolves(stream);
+      await docker.pull.called(withExactArgs("test:latest"));
 
-      const call = await this.docker.$subject.modem.followProgress.called(
-        withArgs(this.stream)
+      const call = await docker.$subject.modem.followProgress.called(
+        withArgs(stream)
       );
       call.args[1](null, true);
 
-      await this.logSpy.called(withExactArgs("Pulled image test:latest"));
+      await logSpy.called(withExactArgs("Pulled image test:latest"));
 
       return await test;
     });

@@ -1,17 +1,19 @@
+import { afterEach, beforeEach, describe, it } from "node:test";
 import sinon from "sinon";
+import "../../test/common.js";
 
 import { Jar, withArgs } from "descartes";
 import fs from "fs/promises";
 import u from "untab";
 import fileLogger from "./fileLogger.js";
 
-describe("fileLogger", function () {
-  it("should be a function", function () {
+describe("fileLogger", () => {
+  it("should be a function", () => {
     fileLogger.should.be.a("Function");
   });
 
   describe.skip("when called", function () {
-    beforeEach(function () {
+    beforeEach(() => {
       const jar = (this.jar = new Jar());
       this.clock = sinon.useFakeTimers();
       this.onSpy = jar.sensor("eventEmitter.on");
@@ -23,13 +25,13 @@ describe("fileLogger", function () {
       sinon.stub(fs, "writeFile").callsFake(this.writeFileSpy);
     });
 
-    afterEach(function () {
+    afterEach(() => {
       this.clock.restore();
       fs.createWriteStream.restore();
       fs.writeFile.restore();
     });
 
-    it("should do things in the right order", async function () {
+    it("should do things in the right order", async () => {
       const result = fileLogger({ on: this.onSpy });
 
       const startCall = await this.onSpy.called(withArgs("start"));

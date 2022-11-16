@@ -8,7 +8,7 @@ export default function (eventEmitter) {
     setLogStream = resolve;
   });
 
-  eventEmitter.on("start", async function (event) {
+  eventEmitter.on("start", async (event) => {
     try {
       plan = event.plan;
       const name = event.spirit;
@@ -25,13 +25,13 @@ export default function (eventEmitter) {
     }
   });
 
-  eventEmitter.on("stage", async function (event) {
+  eventEmitter.on("stage", async (event) => {
     const stream = await logStream;
     const stage = plan.shift();
     stream.write(pad(stage) + "\n");
   });
 
-  eventEmitter.on("message", async function (event) {
+  eventEmitter.on("message", async (event) => {
     const stream = await logStream;
     if (typeof event.message == "string") {
       stream.write(event.message + "\n");
@@ -47,7 +47,7 @@ export default function (eventEmitter) {
     }
   });
 
-  eventEmitter.on("stop", async function (event) {
+  eventEmitter.on("stop", async (event) => {
     const stream = await logStream;
     stream.write(pad(event.error ? "failed" : "done") + "\n");
     if (event.error) {
