@@ -1,15 +1,19 @@
 "use strict";
 
-global.chai = require("chai");
-global.should = require("chai").should();
-global.expect = require("chai").expect;
-global.AssertionError = require("chai").AssertionError;;
+import chai from "chai";
+import chaiAsPromised from "chai-as-promised";
+import sinonChai from "sinon-chai";
+
+global.chai = chai;
+global.should = chai.should();
+global.expect = chai.expect;
+global.AssertionError = chai.AssertionError;
 
 global.swallow = function (thrower) {
   try {
     thrower();
-  } catch (e) { }
+  } catch (e) {}
 };
 
-chai.use(require("sinon-chai"));
-chai.use(require("chai-as-promised"))
+chai.use(sinonChai);
+chai.use(chaiAsPromised);

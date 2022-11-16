@@ -1,40 +1,43 @@
-import Docker from 'dockerode-promise';
-import getNonSpiritContainers from './getNonSpiritContainers';
-import getSpirits from './getSpirits';
-import Spirit from './Spirit';
-import createSpirit from './createSpirit';
-import upgrade from './upgrade';
-import {users} from './users';
-import prettifyLogs from './util/prettifyLogs';
+import Docker from "dockerode-promise";
+import createSpirit from "./createSpirit.js";
+import getNonSpiritContainers from "./getNonSpiritContainers.js";
+import getSpirits from "./getSpirits.js";
+import Spirit from "./Spirit.js";
+import upgrade from "./upgrade.js";
+import { users } from "./users.js";
+import prettifyLogs from "./util/prettifyLogs.js";
 
-export default function samsara(options){
+export default function samsara(options) {
   options = options || {};
 
   var docker = options.docker || new Docker(options.dockerConfig);
 
   return {
-    spirits(){
+    spirits() {
       return getSpirits(docker);
     },
-    spirit(name){
+    spirit(name) {
       return new Spirit(name, docker);
     },
-    createSpirit(name, image, tag){
+    createSpirit(name, image, tag) {
       return createSpirit(name, image, tag);
     },
-    containers(){
+    containers() {
       return getNonSpiritContainers(docker);
     },
-    container(id){
+    container(id) {
       const container = docker.getContainer(id);
-      container.prettyLogs = (html, options) => container.logs(options).then(logs => logs.pipe(prettifyLogs({html:html})));
+      container.prettyLogs = (html, options) =>
+        container
+          .logs(options)
+          .then((logs) => logs.pipe(prettifyLogs({ html: html })));
       return container;
     },
-    upgrade(){
+    upgrade() {
       return upgrade();
     },
-    users(){
+    users() {
       return users();
-    }
+    },
   };
-};
+}

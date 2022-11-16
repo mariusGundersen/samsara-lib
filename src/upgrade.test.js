@@ -1,150 +1,210 @@
-import upgrade from './upgrade';
-import fs from 'fs-promise';
-import {Jar, withArgs, withExactArgs} from 'descartes';
-import sinon from 'sinon';
-import u from 'untab';
+import { Jar, withArgs, withExactArgs } from "descartes";
+import fs from "fs/promises";
+import path from "path";
+import sinon from "sinon";
+import u from "untab";
+import upgrade from "./upgrade.js";
 
-describe("upgrade", function() {
-
-  beforeEach(function(){
+describe("upgrade", function () {
+  beforeEach(function () {
     this.jar = new Jar();
-    this.readdir = this.jar.probe('fs.readdir');
-    this.stat = this.jar.probe('fs.stat');
-    this.readFile = this.jar.probe('fs.readFile');
-    this.writeFile = this.jar.probe('fs.writeFile');
-    sinon.stub(fs, 'readdir', this.readdir);
-    sinon.stub(fs, 'stat', this.stat);
-    sinon.stub(fs, 'readFile', this.readFile);
-    sinon.stub(fs, 'writeFile', this.writeFile);
+    this.readdir = this.jar.probe("fs.readdir");
+    this.stat = this.jar.probe("fs.stat");
+    this.readFile = this.jar.probe("fs.readFile");
+    this.writeFile = this.jar.probe("fs.writeFile");
+    sinon.stub(fs, "readdir").callsFake(this.readdir);
+    sinon.stub(fs, "stat").callsFake(this.stat);
+    sinon.stub(fs, "readFile").callsFake(this.readFile);
+    sinon.stub(fs, "writeFile").callsFake(this.writeFile);
   });
 
-  afterEach(function(){
+  afterEach(function () {
     fs.readdir.restore();
     fs.stat.restore();
     fs.readFile.restore();
     fs.writeFile.restore();
   });
 
-  it("should work", async function(){
+  it("should work", async function () {
     const result = upgrade();
 
     this.stat.resolves(isFile(false));
-    await this.stat.called(withExactArgs('config/authentication'));
+    await this.stat.called(
+      withExactArgs(path.normalize("config/authentication"))
+    );
 
-    this.readFile.rejects(new Error('file does not exist'));
-    await this.readFile.called(withExactArgs('config/authentication', 'utf8'));
+    this.readFile.rejects(new Error("file does not exist"));
+    await this.readFile.called(
+      withExactArgs(path.normalize("config/authentication"), "utf8")
+    );
 
-    await this.writeFile.called(withArgs('config/authentication')).then(call => {
-      const entry = call.args[1].split('\n')[0].split(':');
-      entry[0].should.equal('admin');
-    });
+    await this.writeFile
+      .called(withArgs(path.normalize("config/authentication")))
+      .then((call) => {
+        const entry = call.args[1].split("\n")[0].split(":");
+        entry[0].should.equal("admin");
+      });
 
-    this.readdir.resolves(['test', 'file.json']);
-    await this.readdir.called(withExactArgs('config/spirits'));
+    this.readdir.resolves(["test", "file.json"]);
+    await this.readdir.called(withExactArgs(path.normalize("config/spirits")));
 
     this.stat.resolves(isDirectory(true));
-    await this.stat.called(withExactArgs('config/spirits/test'));
+    await this.stat.called(
+      withExactArgs(path.normalize("config/spirits/test"))
+    );
     this.stat.resolves(isDirectory(false));
-    await this.stat.called(withExactArgs('config/spirits/file.json'));
+    await this.stat.called(
+      withExactArgs(path.normalize("config/spirits/file.json"))
+    );
 
     this.stat.resolves(isFile(false));
-    await this.stat.called(withExactArgs('config/spirits/test/settings.json'));
+    await this.stat.called(
+      withExactArgs(path.normalize("config/spirits/test/settings.json"))
+    );
     this.stat.resolves(isFile(false));
-    await this.stat.called(withExactArgs('config/spirits/test/containerConfig.yml'));
+    await this.stat.called(
+      withExactArgs(path.normalize("config/spirits/test/containerConfig.yml"))
+    );
     this.stat.resolves(isFile(true));
-    await this.stat.called(withExactArgs('config/spirits/test/config.json'));
+    await this.stat.called(
+      withExactArgs(path.normalize("config/spirits/test/config.json"))
+    );
 
-    this.readFile.resolves(JSON.stringify({
-      deploymentMethod: 'start-before-stop',
-      cleanupLimit: 0,
-      description: 'test',
-      url: 'https://test.mariusgundersen.net',
-      webhook: {
-        enable: false
-      },
-      image: 'nginx',
-      tag: 'latest',
-      env: {},
-      volumes: {},
-      ports: {},
-      links: {},
-      volumesFrom: []
-    }, null, '  '));
-    await this.readFile.called(withArgs('config/spirits/test/config.json'));
+    this.readFile.resolves(
+      JSON.stringify(
+        {
+          deploymentMethod: "start-before-stop",
+          cleanupLimit: 0,
+          description: "test",
+          url: "https://test.mariusgundersen.net",
+          webhook: {
+            enable: false,
+          },
+          image: "nginx",
+          tag: "latest",
+          env: {},
+          volumes: {},
+          ports: {},
+          links: {},
+          volumesFrom: [],
+        },
+        null,
+        "  "
+      )
+    );
+    await this.readFile.called(
+      withArgs(path.normalize("config/spirits/test/config.json"))
+    );
 
-    await this.writeFile.called(withArgs('config/spirits/test/settings.json')).then(call => {
-      call.args[1].should.equal(JSON.stringify({
-        name: 'test',
-        deploymentMethod: 'start-before-stop',
-        cleanupLimit: 0,
-        description: 'test',
-        url: 'https://test.mariusgundersen.net',
-        webhook: {
-          enable: false
-        }
-      }, null, '  '));
-    });
+    await this.writeFile
+      .called(withArgs(path.normalize("config/spirits/test/settings.json")))
+      .then((call) => {
+        call.args[1].should.equal(
+          JSON.stringify(
+            {
+              name: "test",
+              deploymentMethod: "start-before-stop",
+              cleanupLimit: 0,
+              description: "test",
+              url: "https://test.mariusgundersen.net",
+              webhook: {
+                enable: false,
+              },
+            },
+            null,
+            "  "
+          )
+        );
+      });
 
-    await this.writeFile.called(withArgs('config/spirits/test/containerConfig.yml')).then(call => {
-      call.args[1].should.equal(u`
+    await this.writeFile
+      .called(
+        withArgs(path.normalize("config/spirits/test/containerConfig.yml"))
+      )
+      .then((call) => {
+        call.args[1].should.equal(u`
         test:
           image: 'nginx:latest'
         `);
-    });
+      });
 
-    this.readdir.resolves(['1']);
-    await this.readdir.called(withArgs('config/spirits/test/lives'));
+    this.readdir.resolves(["1"]);
+    await this.readdir.called(
+      withArgs(path.normalize("config/spirits/test/lives"))
+    );
     this.stat.resolves(isDirectory(true));
-    await this.stat.called(withExactArgs('config/spirits/test/lives/1'));
+    await this.stat.called(
+      withExactArgs(path.normalize("config/spirits/test/lives/1"))
+    );
 
     this.stat.resolves(isFile(false));
-    await this.stat.called(withExactArgs('config/spirits/test/lives/1/containerConfig.yml'));
+    await this.stat.called(
+      withExactArgs(
+        path.normalize("config/spirits/test/lives/1/containerConfig.yml")
+      )
+    );
     this.stat.resolves(isFile(true));
-    await this.stat.called(withExactArgs('config/spirits/test/lives/1/config.json'));
+    await this.stat.called(
+      withExactArgs(path.normalize("config/spirits/test/lives/1/config.json"))
+    );
 
-    this.readFile.resolves(JSON.stringify({
-      deploymentMethod: 'start-before-stop',
-      cleanupLimit: 0,
-      description: 'test',
-      url: 'https://test.mariusgundersen.net',
-      webhook: {
-        enable: false
-      },
-      image: 'nginx',
-      tag: 'latest',
-      env: {},
-      volumes: {},
-      ports: {},
-      links: {},
-      volumesFrom: []
-    }, null, '  '));
-    await this.readFile.called(withArgs('config/spirits/test/lives/1/config.json'));
+    this.readFile.resolves(
+      JSON.stringify(
+        {
+          deploymentMethod: "start-before-stop",
+          cleanupLimit: 0,
+          description: "test",
+          url: "https://test.mariusgundersen.net",
+          webhook: {
+            enable: false,
+          },
+          image: "nginx",
+          tag: "latest",
+          env: {},
+          volumes: {},
+          ports: {},
+          links: {},
+          volumesFrom: [],
+        },
+        null,
+        "  "
+      )
+    );
+    await this.readFile.called(
+      withArgs(path.normalize("config/spirits/test/lives/1/config.json"))
+    );
 
-    await this.writeFile.called(withArgs('config/spirits/test/lives/1/containerConfig.yml')).then(call => {
-      call.args[1].should.equal(u`
+    await this.writeFile
+      .called(
+        withArgs(
+          path.normalize("config/spirits/test/lives/1/containerConfig.yml")
+        )
+      )
+      .then((call) => {
+        call.args[1].should.equal(u`
         test:
           container_name: test_v1
           image: 'nginx:latest'
         `);
-    });
+      });
 
     await result;
     this.jar.done();
   });
 });
 
-function isDirectory(isDir){
+function isDirectory(isDir) {
   return {
-    isDirectory(){
-      return isDir
-    }
+    isDirectory() {
+      return isDir;
+    },
   };
 }
 
-function isFile(isFile){
+function isFile(isFile) {
   return {
-    isFile(){
-      return isFile
-    }
+    isFile() {
+      return isFile;
+    },
   };
 }

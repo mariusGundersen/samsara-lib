@@ -1,166 +1,179 @@
-import Spirit from './Spirit';
-import fs from 'fs-promise';
-import sinon from 'sinon';
-import u from 'untab';
+import fs from "fs/promises";
+import path from "path";
+import sinon from "sinon";
+import u from "untab";
+import Spirit from "./Spirit.js";
 
-describe("the Spirit", function() {
-
-  it("should export a constructor function", function() {
+describe("the Spirit", function () {
+  it("should export a constructor function", function () {
     Spirit.should.be.an.instanceOf(Function);
   });
 
-  describe("instance", function() {
+  describe("instance", function () {
     let instance,
-        docker = {
-          listContainers: sinon.stub()
-        };
+      docker = {
+        listContainers: sinon.stub(),
+      };
 
-    beforeEach(function() {
+    beforeEach(function () {
       instance = new Spirit("test", docker);
     });
 
-    afterEach(function(){
+    afterEach(function () {
       docker.listContainers.reset();
     });
 
-    it("should be a Spirit", function() {
+    it("should be a Spirit", function () {
       instance.should.be.an.instanceOf(Spirit);
     });
 
-    describe("isDeploying", function(){
-      beforeEach(function(){
-        sinon.stub(fs, 'exists')
-          .returns(true);
+    describe("isDeploying", function () {
+      beforeEach(async function () {
+        sinon.stub(fs, "access").resolves();
 
         because: {
-          instance.isDeploying;
+          await instance.isDeploying;
         }
       });
 
-      afterEach(function(){
-        fs.exists.restore();
+      afterEach(function () {
+        fs.access.restore();
       });
 
-      it("should check if the right file exists", function(){
-        fs.exists.should.have.been.calledWith('config/spirits/test/deploy.lock');
+      it("should check if the right file exists", function () {
+        fs.access.should.have.been.calledWith(
+          path.normalize("config/spirits/test/deploy.lock")
+        );
       });
     });
 
-    describe("containerConfig", function(){
+    describe("containerConfig", function () {
       let result;
 
-      beforeEach(async function(){
-        sinon.stub(fs, 'readFile')
-          .returns(Promise.resolve(u`
+      beforeEach(async function () {
+        sinon.stub(fs, "readFile").returns(
+          Promise.resolve(u`
             test:
               image: nginx:latest
-            `));
+            `)
+        );
 
         because: {
           result = await instance.containerConfig;
         }
       });
 
-      afterEach(function(){
+      afterEach(function () {
         fs.readFile.restore();
       });
 
-      it("should read the correct file", function(){
-        fs.readFile.should.have.been.calledWith('config/spirits/test/containerConfig.yml');
+      it("should read the correct file", function () {
+        fs.readFile.should.have.been.calledWith(
+          path.normalize("config/spirits/test/containerConfig.yml")
+        );
       });
     });
 
-    describe("settings", function(){
+    describe("settings", function () {
       let result;
 
-      beforeEach(async function(){
-        sinon.stub(fs, 'readFile')
-          .returns(Promise.resolve(JSON.stringify({name:'test'})));
+      beforeEach(async function () {
+        sinon
+          .stub(fs, "readFile")
+          .returns(Promise.resolve(JSON.stringify({ name: "test" })));
 
         because: {
           result = await instance.settings;
         }
       });
 
-      afterEach(function(){
+      afterEach(function () {
         fs.readFile.restore();
       });
 
-      it("should read the correct file", function(){
-        fs.readFile.should.have.been.calledWith('config/spirits/test/settings.json');
+      it("should read the correct file", function () {
+        fs.readFile.should.have.been.calledWith(
+          path.normalize("config/spirits/test/settings.json")
+        );
       });
 
-      it("should return json", function(){
-        result.should.deep.equal({name:'test'});
+      it("should return json", function () {
+        result.should.deep.equal({ name: "test" });
       });
 
-      describe("mutate", function(){
-        beforeEach(async function(){
-          sinon.stub(fs, 'writeFile')
-            .returns(Promise.resolve());
+      describe("mutate", function () {
+        beforeEach(async function () {
+          sinon.stub(fs, "writeFile").returns(Promise.resolve());
 
           because: {
-            result = await instance.mutateSettings(settings => settings.name = 'hello');
+            result = await instance.mutateSettings(
+              (settings) => (settings.name = "hello")
+            );
           }
         });
 
-        it("should read the correct file", function(){
-          fs.readFile.should.have.been.calledWith('config/spirits/test/settings.json');
+        it("should read the correct file", function () {
+          fs.readFile.should.have.been.calledWith(
+            path.normalize("config/spirits/test/settings.json")
+          );
         });
 
-        it("should write the correct file and content", function(){
-          fs.writeFile.should.have.been.calledWith('config/spirits/test/settings.json', JSON.stringify({name: 'hello'}, null, '  '));
+        it("should write the correct file and content", function () {
+          fs.writeFile.should.have.been.calledWith(
+            path.normalize("config/spirits/test/settings.json"),
+            JSON.stringify({ name: "hello" }, null, "  ")
+          );
         });
 
-        afterEach(function(){
+        afterEach(function () {
           fs.writeFile.restore();
         });
       });
     });
 
-    describe("status stopped", function(){
+    describe("status stopped", function () {
       let result;
 
-      beforeEach(async function(){
-        docker.listContainers
-          .returns(Promise.resolve([]));
+      beforeEach(async function () {
+        docker.listContainers.returns(Promise.resolve([]));
 
         because: {
           result = await instance.status;
         }
       });
 
-      it("should filter correctly", function(){
+      it("should filter correctly", function () {
         docker.listContainers.should.have.been.calledWith({
-          filters: '{"label":["samsara.spirit.life","samsara.spirit.name=test"],"status":["running"]}'
+          filters:
+            '{"label":["samsara.spirit.life","samsara.spirit.name=test"],"status":["running"]}',
         });
       });
 
-      it("should be stopped", function(){
-        result.should.deep.equal('stopped');
+      it("should be stopped", function () {
+        result.should.deep.equal("stopped");
       });
     });
 
-    describe("status running", function(){
+    describe("status running", function () {
       let result;
 
-      beforeEach(async function(){
-        docker.listContainers
-          .returns(Promise.resolve([{}]));
+      beforeEach(async function () {
+        docker.listContainers.returns(Promise.resolve([{}]));
 
         because: {
           result = await instance.status;
         }
       });
 
-      it("should filter correctly", function(){
+      it("should filter correctly", function () {
         docker.listContainers.should.have.been.calledWith({
-          filters: '{"label":["samsara.spirit.life","samsara.spirit.name=test"],"status":["running"]}'
+          filters:
+            '{"label":["samsara.spirit.life","samsara.spirit.name=test"],"status":["running"]}',
         });
       });
 
-      it("should be stopped", function(){
-        result.should.deep.equal('running');
+      it("should be stopped", function () {
+        result.should.deep.equal("running");
       });
     });
   });

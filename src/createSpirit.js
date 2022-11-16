@@ -1,29 +1,39 @@
-import fs from 'fs-promise';
-import mkdirp from 'mkdirp-promise';
-import yaml from 'js-yaml';
-import {spirit, spiritLives, spiritContainerConfig, spiritSettingsJson} from './paths';
+import fs from "fs/promises";
+import yaml from "js-yaml";
+import {
+  spirit,
+  spiritContainerConfig,
+  spiritLives,
+  spiritSettingsJson,
+} from "./paths.js";
 
-export default async function(name, image, tag){
+export default async function (name, image, tag) {
   const spiritSettings = {
     name: name,
-    deploymentMethod: 'start-before-stop',
+    deploymentMethod: "start-before-stop",
     cleanupLimit: 10,
-    description: '',
-    url: '',
+    description: "",
+    url: "",
     webhook: {
       enable: false,
-      secret: '',
-      matchTag: ''
-    }
+      secret: "",
+      matchTag: "",
+    },
   };
 
   const containerConfig = {
-    image: image+':'+tag,
-    restart: 'unless-stopped'
+    image: image + ":" + tag,
+    restart: "unless-stopped",
   };
 
-  await mkdirp(spirit(name));
-  await mkdirp(spiritLives(name));
-  await fs.writeFile(spiritContainerConfig(name), yaml.safeDump({[name]:containerConfig}));
-  await fs.writeFile(spiritSettingsJson(name), JSON.stringify(spiritSettings, null, '  '));
-};
+  await fs.mkdir(spirit(name), { recursive: true });
+  await fs.mkdir(spiritLives(name), { recursive: true });
+  await fs.writeFile(
+    spiritContainerConfig(name),
+    yaml.safeDump({ [name]: containerConfig })
+  );
+  await fs.writeFile(
+    spiritSettingsJson(name),
+    JSON.stringify(spiritSettings, null, "  ")
+  );
+}

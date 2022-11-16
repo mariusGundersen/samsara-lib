@@ -1,134 +1,136 @@
-import Life from './Life';
-import fs from 'fs-promise';
-import sinon from 'sinon';
+import fs from "fs/promises";
+import path from "path";
+import sinon from "sinon";
+import Life from "./Life.js";
 
-describe("the Life", function() {
-
-  it("should export a constructor function", function() {
+describe("the Life", function () {
+  it("should export a constructor function", function () {
     Life.should.be.an.instanceOf(Function);
   });
 
-  describe("instance", function() {
+  describe("instance", function () {
     let instance,
-        docker = {
-          listContainers: sinon.stub(),
-          getContainer: sinon.stub()
-        };
+      docker = {
+        listContainers: sinon.stub(),
+        getContainer: sinon.stub(),
+      };
 
-    beforeEach(function() {
+    beforeEach(function () {
       instance = new Life("test", "1", docker);
     });
 
-    afterEach(function(){
+    afterEach(function () {
       docker.listContainers.reset();
       docker.getContainer.reset();
     });
 
-    it("should be a Life", function() {
+    it("should be a Life", function () {
       instance.should.be.an.instanceOf(Life);
     });
 
-    describe("containerConfig", function(){
+    describe("containerConfig", function () {
       let result;
 
-      beforeEach(async function(){
-        sinon.stub(fs, 'readFile')
-          .returns(Promise.resolve(`test:`));
+      beforeEach(async function () {
+        sinon.stub(fs, "readFile").returns(Promise.resolve(`test:`));
 
         because: {
           result = await instance.containerConfig;
         }
       });
 
-      afterEach(function(){
+      afterEach(function () {
         fs.readFile.restore();
       });
 
-      it("should read the correct file", function(){
-        fs.readFile.should.have.been.calledWith('config/spirits/test/lives/1/containerConfig.yml');
+      it("should read the correct file", function () {
+        fs.readFile.should.have.been.calledWith(
+          path.normalize("config/spirits/test/lives/1/containerConfig.yml")
+        );
       });
 
-      it("should return yaml", function(){
+      it("should return yaml", function () {
         result.should.equal(`test:`);
       });
     });
 
-    describe("container", function(){
+    describe("container", function () {
       let result;
 
-      beforeEach(async function(){
-        docker.listContainers.returns(Promise.resolve([
-          {Id: 'abcd123'}
-        ]));
+      beforeEach(async function () {
+        docker.listContainers.returns(Promise.resolve([{ Id: "abcd123" }]));
 
-        docker.getContainer.returns(Promise.resolve({
-          id: 'abcd123'
-        }));
+        docker.getContainer.returns(
+          Promise.resolve({
+            id: "abcd123",
+          })
+        );
 
         because: {
           result = await instance.container;
         }
       });
 
-      it("should filter correctly", function(){
+      it("should filter correctly", function () {
         docker.listContainers.should.have.been.calledWith({
           all: true,
-          filters: '{"label":["samsara.spirit.life=1","samsara.spirit.name=test"]}'
+          filters:
+            '{"label":["samsara.spirit.life=1","samsara.spirit.name=test"]}',
         });
       });
 
-      it("should get the right container", function(){
-        docker.getContainer.should.have.been.calledWith('abcd123');
+      it("should get the right container", function () {
+        docker.getContainer.should.have.been.calledWith("abcd123");
       });
 
-      it("should return the container", function(){
-        result.should.deep.equal({id:'abcd123'});
+      it("should return the container", function () {
+        result.should.deep.equal({ id: "abcd123" });
       });
     });
 
-    describe("status stopped", function(){
+    describe("status stopped", function () {
       let result;
 
-      beforeEach(async function(){
-        docker.listContainers
-          .returns(Promise.resolve([]));
+      beforeEach(async function () {
+        docker.listContainers.returns(Promise.resolve([]));
 
         because: {
           result = await instance.status;
         }
       });
 
-      it("should filter correctly", function(){
+      it("should filter correctly", function () {
         docker.listContainers.should.have.been.calledWith({
-          filters: '{"label":["samsara.spirit.life=1","samsara.spirit.name=test"],"status":["running"]}'
+          filters:
+            '{"label":["samsara.spirit.life=1","samsara.spirit.name=test"],"status":["running"]}',
         });
       });
 
-      it("should be stopped", function(){
-        result.should.deep.equal('stopped');
+      it("should be stopped", function () {
+        result.should.deep.equal("stopped");
       });
     });
 
-    describe("status running", function(){
+    describe("status running", function () {
       let result;
 
-      beforeEach(async function(){
-        docker.listContainers
-          .returns(Promise.resolve([{}]));
+      beforeEach(async function () {
+        docker.listContainers.returns(Promise.resolve([{}]));
 
         because: {
           result = await instance.status;
         }
       });
 
-      it("should filter correctly", function(){
+      it("should filter correctly", function () {
         docker.listContainers.should.have.been.calledWith({
-          filters: '{"label":["samsara.spirit.life=1","samsara.spirit.name=test"],"status":["running"]}'
+          filters:
+            '{"label":["samsara.spirit.life=1","samsara.spirit.name=test"],"status":["running"]}',
         });
       });
 
-      it("should be stopped", function(){
-        result.should.deep.equal('running');
+      it("should be stopped", function () {
+        result.should.deep.equal("running");
       });
     });
   });
